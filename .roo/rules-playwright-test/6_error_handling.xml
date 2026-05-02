@@ -1,0 +1,135 @@
+<error_handling>
+  <common_errors>
+    <error name="element_not_found">
+      <description>Locator cannot find element</description>
+      <causes>
+        <cause>Element not yet rendered</cause>
+        <cause>Wrong locator strategy</cause>
+        <cause>Element in different frame</cause>
+        <cause>Dynamic content not loaded</cause>
+      </causes>
+      <solutions>
+        <solution>Use web-first assertions that auto-wait</solution>
+        <solution>Verify locator matches visible text or role</solution>
+        <solution>Add frame handling if needed</solution>
+        <solution>Wait for network idle or specific state</solution>
+      </solutions>
+      <example>
+        <![CDATA[
+# BAD - Element may not be ready
+element = page.locator(".button")
+assert element.is_visible()
+
+# GOOD - Auto-waits for element
+from playwright.sync_api import expect
+expect(page.get_by_role("button")).to_be_visible()
+        ]]>
+      </example>
+    </error>
+
+    <error name="flaky_test">
+      <description>Test passes sometimes, fails other times</description>
+      <causes>
+        <cause>Timing dependencies</cause>
+        <cause>Shared state between tests</cause>
+        <cause>External service dependencies</cause>
+      </causes>
+      <solutions>
+        <solution>Use proper assertions instead of waits</solution>
+        <solution>Ensure test isolation with fixtures</solution>
+        <solution>Mock external services</solution>
+      </solutions>
+    </error>
+
+    <error name="timeout_error">
+      <description>Operation exceeds timeout limit</description>
+      <causes>
+        <cause>Slow network or server</cause>
+        <cause>Element never appears</cause>
+        <cause>Navigation blocked</cause>
+      </causes>
+      <solutions>
+        <solution>Increase timeout for known slow operations</solution>
+        <solution>Check element actually exists in DOM</solution>
+        <solution>Verify navigation target is accessible</solution>
+      </solutions>
+      <example>
+        <![CDATA[
+# Increase timeout for slow operations
+expect(page.get_by_text("Loading...")).to_be_visible(timeout=30000)
+        ]]>
+      </example>
+    </error>
+  </common_errors>
+
+  <debugging_strategies>
+    <strategy name="trace_viewer">
+      <description>Use Playwright Trace Viewer for debugging</description>
+      <steps>
+        <step>Run test with --trace on flag</step>
+        <step>Open trace with playwright show-trace</step>
+        <step>Review timeline, screenshots, and network logs</step>
+      </steps>
+    </strategy>
+
+    <strategy name="screenshot_on_failure">
+      <description>Capture screenshot when test fails</description>
+      <example>
+        <![CDATA[
+def test_something(page: Page):
+    try:
+        # Test steps
+        expect(page.get_by_text("Success")).to_be_visible()
+    except Exception as e:
+        page.screenshot(path="failure.png")
+        raise
+        ]]>
+      </example>
+    </strategy>
+
+    <strategy name="console_logging">
+      <description>Log browser console for debugging</description>
+      <example>
+        <![CDATA[
+def test_with_logs(page: Page):
+    page.on("console", lambda msg: print(f"Console: {msg.text}"))
+    # Test steps...
+        ]]>
+      </example>
+    </strategy>
+  </debugging_strategies>
+
+  <recovery_patterns>
+    <pattern name="retry_logic">
+      <description>Retry failed operations</description>
+      <example>
+        <![CDATA[
+from playwright.sync_api import expect
+
+def test_with_retry(page: Page):
+    # Playwright has built-in retry with test.configure
+    expect(page.get_by_text("Data")).to_be_visible()
+        ]]>
+      </example>
+    </pattern>
+
+    <pattern name="fallback_locator">
+      <description>Try multiple locator strategies</description>
+      <example>
+        <![CDATA[
+def get_submit_button(page: Page):
+    # Try multiple strategies
+    locators = [
+        page.get_by_role("button", name="Submit"),
+        page.get_by_text("Submit"),
+        page.locator("[type='submit']")
+    ]
+    for locator in locators:
+        if locator.count() > 0:
+            return locator
+    raise Exception("Submit button not found")
+        ]]>
+      </example>
+    </pattern>
+  </recovery_patterns>
+</error_handling>

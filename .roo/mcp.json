@@ -1,0 +1,46 @@
+{
+	"mcpServers": {
+		"sequentialthinking": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-sequential-thinking"
+			],
+			"alwaysAllow": [
+				"sequentialthinking"
+			]
+		},
+		"memory": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-memory"
+			],
+			"alwaysAllow": [
+				"add_observations",
+				"search_nodes",
+				"create_entities",
+				"create_relations",
+				"delete_entities",
+				"delete_observations",
+				"delete_relations",
+				"read_graph",
+				"open_nodes"
+			]
+		},
+		"docker-build-verify": {
+			"command": "bash",
+			"args": [
+				"scripts/docker-build-verify.sh",
+				"--all"
+			],
+			"alwaysAllow": [
+				"docker-build-verify",
+				"verify_frontend",
+				"verify_backend",
+				"check_docker_available"
+			],
+			"disabled": false
+		}
+	}
+}

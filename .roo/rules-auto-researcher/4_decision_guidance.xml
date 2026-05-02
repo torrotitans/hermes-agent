@@ -1,0 +1,76 @@
+<decision_guidance>
+  <principles>
+    <principle>Prefer the smallest change that tests a clear hypothesis</principle>
+    <principle>Use val_bpb as the primary decision metric for experiment success</principle>
+    <principle>Systematically explore untested areas before re-exploring known areas</principle>
+    <principle>Ask a clarifying question only when critical ambiguity remains about research goals</principle>
+    <principle>Maintain clean git history - reset on failures immediately</principle>
+  </principles>
+
+  <experiment_selection>
+    <criteria>
+      <criterion priority="high">
+        <name>Novelty</name>
+        <description>Prefer experiments that explore untested areas first</description>
+      </criterion>
+      <criterion priority="high">
+        <name>Impact Potential</name>
+        <description>Prioritize changes with highest expected impact on val_bpb</description>
+      </criterion>
+      <criterion priority="medium">
+        <name>Risk Level</name>
+        <description>Lower risk changes (LR tuning) before higher risk (architecture changes)</description>
+      </criterion>
+      <criterion priority="medium">
+        <name>Resource Cost</name>
+        <description>Favor changes that don't significantly increase memory or time</description>
+      </criterion>
+    </criteria>
+  </experiment_selection>
+
+  <result_evaluation>
+    <decision_tree>
+      <case>
+        <condition>val_bpb improved AND no crash</condition>
+        <action>Keep commit, log as "keep", continue research</action>
+      </case>
+      <case>
+        <condition>val_bpb worse OR no change</condition>
+        <action>Reset commit, log as "discard", try different hypothesis</action>
+      </case>
+      <case>
+        <condition>Crash (OOM, NaN, timeout)</condition>
+        <action>Log as "crash", reset, analyze failure cause before next experiment</action>
+      </case>
+    </decision_tree>
+  </result_evaluation>
+
+  <boundaries>
+    <rule>Only modify train.py - prepare.py and program.md are read-only</rule>
+    <rule>Do not modify data preparation or evaluation code</rule>
+    <rule>Each experiment must have a clear, testable hypothesis</rule>
+    <rule>Never commit results.tsv - it must remain untracked</rule>
+    <rule>Define clear responsibilities and explicit handoff points to other modes</rule>
+  </boundaries>
+
+  <handoff_rules>
+    <rule>
+      <when>Research goal is unclear or ambiguous</when>
+      <action>Ask the user to clarify the primary optimization target</action>
+    </rule>
+    <rule>
+      <when>Hardware constraints prevent further experimentation</when>
+      <action>Report limitations and suggest alternative approaches</action>
+    </rule>
+    <rule>
+      <when>Research session completes without significant improvement</when>
+      <action>Summarize findings and suggest new research directions</action>
+    </rule>
+  </handoff_rules>
+
+  <validation>
+    <rule>After changes, scan for contradictions and update examples to match</rule>
+    <rule>Verify results.tsv format is correct before each log entry</rule>
+    <rule>Confirm git state is clean (no uncommitted changes) between experiments</rule>
+  </validation>
+</decision_guidance>

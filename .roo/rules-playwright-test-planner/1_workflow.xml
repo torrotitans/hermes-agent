@@ -1,0 +1,149 @@
+<workflow_instructions>
+  <mode_overview>
+    Playwright Test Planner mode creates structured test plans from business user stories.
+    You produce specifications in specs/ directory that the generator will use to create tests.
+  </mode_overview>
+
+  <initialization_steps>
+    <step number="1">
+      <action>Understand the user story</action>
+      <details>
+        Parse the user story to identify:
+        - User role and persona
+        - Action to be performed
+        - Expected outcome
+        - Acceptance criteria
+      </details>
+    </step>
+
+    <step number="2">
+      <action>Review existing test infrastructure</action>
+      <details>
+        Check existing structure:
+        - specs/ directory for existing test plans
+        - tests/seed.spec.ts or tests/seed.spec.py for seed test patterns
+        - tests/e2e/ui/pages/ for existing Page Objects
+        - playwright.config.ts for configuration
+      </details>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="analysis">
+      <description>Analyze user story and identify test scenarios</description>
+      <steps>
+        <step>Extract acceptance criteria from user story</step>
+        <step>Identify positive test cases (happy path)</step>
+        <step>Identify negative test cases (error scenarios)</step>
+        <step>Identify edge cases and boundary conditions</step>
+        <step>Map user actions to UI elements</step>
+      </steps>
+    </phase>
+
+    <phase name="documentation_fetch">
+      <description>Fetch relevant Playwright documentation</description>
+      <steps>
+        <step>Use web-crawler skill to fetch Playwright docs</step>
+        <step>Convert documentation to markdown using web-to-markdown skill</step>
+        <step>Extract relevant patterns for test planning</step>
+      </steps>
+    </phase>
+
+    <phase name="spec_creation">
+      <description>Create structured test specification</description>
+      <steps>
+        <step>Create specs/<feature>.md with proper structure</step>
+        <step>Include Application Overview section</step>
+        <step>Define Test Scenarios with steps and expected results</step>
+        <step>Reference seed test for patterns</step>
+        <step>Include test data requirements</step>
+      </steps>
+    </phase>
+
+    <phase name="seed_test">
+      <description>Create or update seed test</description>
+      <steps>
+        <step>Create tests/seed.spec.ts or tests/seed.spec.py</step>
+        <step>Set up environment and fixtures</step>
+        <step>Demonstrate test patterns for generator</step>
+        <step>Include authentication setup if needed</step>
+      </steps>
+    </phase>
+
+    <phase name="validation">
+      <description>Verify test plan completeness</description>
+      <steps>
+        <step>Check all acceptance criteria are covered</step>
+        <step>Verify test scenarios are clear and actionable</step>
+        <step>Ensure test data requirements are documented</step>
+        <step>Confirm spec follows Playwright agent architecture</step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <spec_structure>
+    <required_sections>
+      <section name="title">
+        <format># <Feature> Test Plan</format>
+        <description>Clear title identifying the feature being tested</description>
+      </section>
+      <section name="application_overview">
+        <format>## Application Overview</format>
+        <description>Description of the application and its key features</description>
+        <content>
+          - Feature list
+          - User roles
+          - Key workflows
+        </content>
+      </section>
+      <section name="test_scenarios">
+        <format>## Test Scenarios</format>
+        <description>Structured test scenarios with steps and expected results</description>
+        <content>
+          Each scenario should include:
+          - Scenario name
+          - Seed reference (tests/seed.spec.ts or tests/seed.spec.py)
+          - Steps (numbered list)
+          - Expected Results (bullet list)
+        </content>
+      </section>
+      <section name="test_data">
+        <format>## Test Data</format>
+        <description>Required test data and fixtures</description>
+        <content>
+          - User credentials
+          - Pre-existing data
+          - Dynamic data requirements
+        </content>
+      </section>
+    </required_sections>
+
+    <scenario_template>
+<![CDATA[
+### <Scenario Number> <Scenario Name>
+
+**Seed:** `tests/seed.spec.ts`
+
+#### <Sub-scenario>
+
+**Steps:**
+1. <Action 1>
+2. <Action 2>
+3. <Action 3>
+
+**Expected Results:**
+- <Result 1>
+- <Result 2>
+]]>
+    </scenario_template>
+  </spec_structure>
+
+  <completion_criteria>
+    <criterion>Spec file created in specs/ directory</criterion>
+    <criterion>All acceptance criteria covered by test scenarios</criterion>
+    <criterion>Positive, negative, and edge cases identified</criterion>
+    <criterion>Test scenarios include clear steps and expected results</criterion>
+    <criterion>Seed test created or updated if needed</criterion>
+    <criterion>Test data requirements documented</criterion>
+  </completion_criteria>
+</workflow_instructions>

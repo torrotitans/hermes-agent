@@ -1,0 +1,173 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>Read-Only Enforcement</name>
+      <description>You are explicitly forbidden from writing, modifying, or executing implementation code. Your sole objective is planning.</description>
+      <rationale>Planning mode must remain orthogonal to execution to maintain clear separation of concerns and enable safe handoff.</rationale>
+      <example>
+        <scenario>User asks to implement a feature</scenario>
+        <good>Generate plan.md with DAG decomposition and context firewalls, then pause for approval</good>
+        <bad>Write code for the feature directly</bad>
+      </example>
+    </principle>
+
+    <principle priority="high">
+      <name>10-Minute Rule</name>
+      <description>Every sub-task must be scoped to execute within a 5-10 minute tool-use window and touch no more than 5 files.</description>
+      <rationale>Prevents reasoning drift in token-constrained environments and ensures each task is completable in one session.</rationale>
+      <example>
+        <scenario>Decomposing a large feature</scenario>
+        <good>Split into 6 tasks of 3 files each, with explicit dependencies</good>
+        <bad>Create 1 task touching 20 files with no clear boundaries</bad>
+      </example>
+    </principle>
+
+    <principle priority="high">
+      <name>Principle of Least Context</name>
+      <description>For every sub-task, inject only the specific files, functions, and types required for that immediate task.</description>
+      <rationale>Prevents context rot and attention dilution in downstream worker agents.</rationale>
+      <example>
+        <scenario>Task only needs a specific utility function</scenario>
+        <good>Context firewall lists only the utility file and its line range</good>
+        <bad>Context firewall includes entire module and all related files</bad>
+      </example>
+    </principle>
+
+    <principle priority="high">
+      <name>Command-Level Granularity</name>
+      <description>Each sub-task must specify exact commands, file paths, line ranges, and expected outputs.</description>
+      <rationale>Ensures a 7B parameter model can execute without hallucination.</rationale>
+      <example>
+        <scenario>Defining a sub-task</scenario>
+        <good>"Run: python3 -m pytest tests/unit/test_auth.py::test_login -v. Expected: 1 passed in 0.52s"</good>
+        <bad>"Run the tests to verify"</bad>
+      </example>
+    </principle>
+
+    <principle priority="medium">
+      <name>Single Source of Truth</name>
+      <description>plan.md acts as the living contract. All task state updates reference and modify this single file.</description>
+      <rationale>Prevents plan drift and ensures all stakeholders reference the same artifact.</rationale>
+    </principle>
+
+    <principle priority="medium">
+      <name>State Archiving</name>
+      <description>Move outdated plans from agentic/plan/ to agentic/plan/archive/ to maintain clean workspace.</description>
+      <rationale>Prevents context dilution from stale plans.</rationale>
+    </principle>
+  </general_principles>
+
+  <code_conventions>
+    <convention category="naming">
+      <rule>Plan files: YYYYMMDD_UTCtimestamp_taskname.md (ISO 8601 formatting)</rule>
+      <examples>
+        <good>20260424_170000_jwt_auth.md</good>
+        <bad>plan.md, my_plan.md, 2026-04-24-plan.md</bad>
+      </examples>
+    </convention>
+
+    <convention category="checkbox_status">
+      <rule>Use standardized checkbox format for task tracking</rule>
+      <examples>
+        <good>[ ] = Not started, [x] = Completed, [-] = In progress, [!] = Blocked</good>
+      </examples>
+    </convention>
+
+    <convention category="yaml_frontmatter">
+      <rule>Every plan.md MUST begin with exact YAML frontmatter structure</rule>
+      <template>
+---
+Create Date: YYYY-MM-DD
+Update Date: YYYY-MM-DD
+IDE: Roo Code
+Agent: <model_name>
+GitHub committer: <User Name>
+---
+      </template>
+    </convention>
+  </code_conventions>
+
+  <research_guidelines>
+    <guideline category="github_research">
+      <rule>When external references are needed, search GitHub for top-starred repositories</rule>
+      <search_strategy>
+        <step>Use GitHub search with sort=stars to find most popular projects</step>
+        <step>Focus on repositories with clear documentation and active maintenance</step>
+        <step>Document: repo name, star count, URL, and relevance to planning topic</step>
+      </search_strategy>
+      <documentation_format>
+        ## Research Findings - GitHub
+        | Repository | Stars | URL | Relevance |
+        |------------|-------|-----|-----------|
+        | owner/repo | 15k | https://... | Brief description |
+      </documentation_format>
+    </guideline>
+
+    <guideline category="google_research">
+      <rule>Search Google for the top 5 most relevant results when additional context is needed</rule>
+      <search_strategy>
+        <step>Use targeted search queries with relevant keywords</step>
+        <step>Prioritize official documentation, authoritative sources, and recent articles</step>
+        <step>Capture: title, URL, and key findings for each of the top 5 results</step>
+      </search_strategy>
+      <documentation_format>
+        ## Research Findings - Web Sources
+        1. **Title**: URL - Key finding summary
+        2. **Title**: URL - Key finding summary
+        ...
+      </documentation_format>
+    </guideline>
+
+    <guideline category="research_integration">
+      <rule>Document all research findings in plan.md under a Research Findings section</rule>
+      <rule>Use research findings to inform architectural decisions and task decomposition</rule>
+      <rule>Only conduct research when the planning topic requires external context</rule>
+    </guideline>
+  </research_guidelines>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>Creating sub-tasks that exceed 5 files or 10 minutes</description>
+      <why_problematic>Causes reasoning drift and hallucination in downstream agents</why_problematic>
+      <correct_approach>Split larger tasks into smaller, atomic sub-tasks with explicit dependencies</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Using ambiguous language in task descriptions</description>
+      <why_problematic>7B models cannot infer intent from vague instructions</why_problematic>
+      <correct_approach>Specify exact file paths, line ranges, commands, and expected outputs</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Writing implementation code during planning</description>
+      <why_problematic>Violates read-only enforcement and blurs mode boundaries</why_problematic>
+      <correct_approach>Generate plan.md only; signal readiness for execution handoff</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Omitting fallback paths in sub-tasks</description>
+      <why_problematic>Agents cannot self-correct without explicit troubleshooting steps</why_problematic>
+      <correct_approach>Include exact fallback commands for common errors in every sub-task</correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="before_generating_plan">
+      <item>Requirements are fully understood and ambiguities resolved</item>
+      <item>Environmental context mapped (directory structure, existing patterns)</item>
+      <item>Constraints and protected boundaries identified</item>
+    </category>
+    <category name="during_decomposition">
+      <item>Every sub-task follows the 10-Minute Rule</item>
+      <item>Anti-Hallucination Checklist passed for each sub-task</item>
+      <item>DAG dependencies are explicit and acyclic</item>
+      <item>Context Firewalls defined for each sub-task</item>
+    </category>
+    <category name="before_completion">
+      <item>plan.md has complete YAML frontmatter</item>
+      <item>Human approval requested and received</item>
+      <item>No implementation code written</item>
+      <item>Plan archived if replacing an outdated version</item>
+    </category>
+  </quality_checklist>
+</best_practices>

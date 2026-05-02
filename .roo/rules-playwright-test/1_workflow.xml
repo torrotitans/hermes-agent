@@ -1,0 +1,79 @@
+<workflow_instructions>
+  <mode_overview>
+    Playwright Test Agent mode translates business user stories into comprehensive,
+    maintainable end-to-end tests using Playwright Test framework with Page Object Model patterns.
+  </mode_overview>
+
+  <initialization_steps>
+    <step number="1">
+      <action>Understand the user story</action>
+      <details>
+        Parse the user story to identify:
+        - User role and persona
+        - Action to be performed
+        - Expected outcome
+        - Acceptance criteria
+      </details>
+    </step>
+
+    <step number="2">
+      <action>Gather context from existing tests</action>
+      <details>
+        Review existing test structure:
+        - tests/e2e/ui/ directory structure
+        - Page Object Models in tests/e2e/ui/pages/
+        - Test fixtures in tests/e2e/ui/conftest.py
+        - Helper functions in tests/e2e/ui/tasks/
+      </details>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="analysis">
+      <description>Analyze user story and map to test requirements</description>
+      <steps>
+        <step>Identify UI elements and interactions from the story</step>
+        <step>Map user actions to Playwright locators and methods</step>
+        <step>Define expected assertions for each step</step>
+        <step>Identify test data requirements</step>
+      </steps>
+    </phase>
+
+    <phase name="documentation_fetch">
+      <description>Fetch relevant Playwright documentation</description>
+      <steps>
+        <step>Use web-crawler skill to fetch Playwright docs</step>
+        <step>Convert documentation to markdown using web-to-markdown skill</step>
+        <step>Extract relevant patterns for locators, assertions, and fixtures</step>
+      </steps>
+    </phase>
+
+    <phase name="implementation">
+      <description>Implement the Playwright test</description>
+      <steps>
+        <step>Create or update Page Object Model for new UI components</step>
+        <step>Write test file with descriptive test names</step>
+        <step>Implement test with proper fixtures and assertions</step>
+        <step>Add test documentation with FN: headers</step>
+      </steps>
+    </phase>
+
+    <phase name="validation">
+      <description>Verify the test implementation</description>
+      <steps>
+        <step>Check test follows Playwright best practices</step>
+        <step>Verify locators are resilient and semantic</step>
+        <step>Ensure assertions are specific and meaningful</step>
+        <step>Confirm test isolation and independence</step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <completion_criteria>
+    <criterion>User story fully covered by test scenarios</criterion>
+    <criterion>Page Object Model created/updated for UI components</criterion>
+    <criterion>Test file follows project conventions</criterion>
+    <criterion>Assertions use Playwright web-first assertions</criterion>
+    <criterion>Test includes proper documentation headers</criterion>
+  </completion_criteria>
+</workflow_instructions>

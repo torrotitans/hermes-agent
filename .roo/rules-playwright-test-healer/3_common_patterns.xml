@@ -1,0 +1,56 @@
+<common_patterns>
+  <pattern name="locator_healing">
+    <description>Common locator update patterns</description>
+    <patterns>
+      <pattern name="css_to_role">
+        <description>Replace CSS selector with role-based locator</description>
+        <before>page.locator(".btn-submit")</before>
+        <after>page.get_by_role("button", name="Submit")</after>
+      </pattern>
+      <pattern name="xpath_to_text">
+        <description>Replace XPath with text-based locator</description>
+        <before>page.locator("//div[@class='error']")</before>
+        <after>page.get_by_text("Error message")</after>
+      </pattern>
+      <pattern name="id_to_label">
+        <description>Replace ID with label-based locator</description>
+        <before>page.locator("#email")</before>
+        <after>page.get_by_label("Email Address")</after>
+      </pattern>
+    </patterns>
+  </pattern>
+
+  <pattern name="wait_healing">
+    <description>Replace hardcoded waits with auto-waiting</description>
+    <patterns>
+      <pattern name="timeout_to_visible">
+        <description>Replace timeout with visibility check</description>
+        <before>page.wait_for_timeout(5000)</before>
+        <after>expect(page.get_by_text("Loaded")).to_be_visible()</after>
+      </pattern>
+      <pattern name="sleep_to_enabled">
+        <description>Replace sleep with enabled check</description>
+        <before>page.wait_for_timeout(2000)</before>
+        <after>expect(page.get_by_role("button")).to_be_enabled()</after>
+      </pattern>
+    </patterns>
+  </pattern>
+
+  <pattern name="error_diagnosis">
+    <description>Common error patterns and fixes</description>
+    <patterns>
+      <pattern name="element_not_found">
+        <error>TimeoutError: Element not found</error>
+        <fix>Update locator to use semantic selector</fix>
+      </pattern>
+      <pattern name="element_not_visible">
+        <error>Element is not visible</error>
+        <fix>Check if element is within viewport or scroll to it</fix>
+      </pattern>
+      <pattern name="element_not_enabled">
+        <error>Element is not enabled</error>
+        <fix>Wait for element to be enabled or check prerequisites</fix>
+      </pattern>
+    </patterns>
+  </pattern>
+</common_patterns>

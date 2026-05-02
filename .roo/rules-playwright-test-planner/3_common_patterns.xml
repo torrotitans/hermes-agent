@@ -1,0 +1,120 @@
+<common_patterns>
+  <pattern name="spec_file_structure">
+    <description>Standard spec file structure</description>
+    <template>
+<![CDATA[
+# <Feature Name> Test Plan
+
+## Application Overview
+
+<Description of the application and its key features>
+
+Key features include:
+- <Feature 1>
+- <Feature 2>
+- <Feature 3>
+
+## Test Scenarios
+
+### 1. <Scenario Group Name>
+
+**Seed:** `tests/seed.spec.ts`
+
+#### 1.1 <Scenario Name>
+
+**Steps:**
+1. <Action 1>
+2. <Action 2>
+3. <Action 3>
+
+**Expected Results:**
+- <Result 1>
+- <Result 2>
+
+#### 1.2 <Next Scenario>
+
+**Steps:**
+1. <Action 1>
+
+**Expected Results:**
+- <Result 1>
+
+## Test Data
+
+| Data Type | Description | Source |
+|-----------|-------------|--------|
+| User Credentials | Valid login credentials | fixtures |
+| Test Content | Sample data for testing | assets/test_data/ |
+]]>
+    </template>
+  </pattern>
+
+  <pattern name="positive_test_scenario">
+    <description>Happy path test scenario</description>
+    <template>
+<![CDATA[
+#### <Number>.<Number> <Action> Successfully
+
+**Steps:**
+1. Navigate to <page>
+2. <Action 1>
+3. <Action 2>
+
+**Expected Results:**
+- <Success indicator 1>
+- <Success indicator 2>
+]]>
+    </template>
+  </pattern>
+
+  <pattern name="negative_test_scenario">
+    <description>Error handling test scenario</description>
+    <template>
+<![CDATA[
+#### <Number>.<Number> <Action> With Invalid Input
+
+**Steps:**
+1. Navigate to <page>
+2. Enter invalid data: <description>
+3. Submit form
+
+**Expected Results:**
+- Error message displayed: <text>
+- Form remains visible
+- Data not submitted
+]]>
+    </template>
+  </pattern>
+
+  <pattern name="edge_case_scenario">
+    <description>Boundary condition test scenario</description>
+    <template>
+<![CDATA[
+#### <Number>.<Number> <Action> With Edge Case
+
+**Steps:**
+1. <Setup>
+2. <Action with boundary value>
+
+**Expected Results:**
+- <Expected behavior>
+]]>
+    </template>
+  </pattern>
+
+  <pattern name="seed_test_structure">
+    <description>Seed test for environment setup</description>
+    <template>
+<![CDATA[
+// tests/seed.spec.ts
+import { test, expect } from './fixtures';
+
+test('seed', async ({ page }) => {
+  // Set up environment
+  // Demonstrate test patterns
+  // Show fixture usage
+});
+]]>
+    </template>
+  </pattern>
+</common_patterns>

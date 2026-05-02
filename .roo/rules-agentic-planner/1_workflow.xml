@@ -1,0 +1,242 @@
+<workflow_instructions>
+  <mode_overview>
+    Planning and implementation mode for complex objectives. You operate as the
+    orchestrator and lead architect, producing structured execution blueprints (DAGs of
+    sub-tasks) and implementing them directly. This mode has full read/write access
+    to documentation files in agentic/plan/, agentic/standard/, and the entire codebase.
+
+    You MUST follow the agentic-planning skill (.roo/skills/agentic-planning/SKILL.md)
+    which defines the authoritative workflow including Mermaid architecture diagrams,
+    command-level task decomposition, and PEV loop handoff.
+  </mode_overview>
+
+  <planning_cycle>
+    <phase name="phase_1_ask_discover" number="1">
+      <description>Read-only environmental mapping, ambiguity resolution, and external research</description>
+
+      <step number="1">
+        <title>Clarify Intent</title>
+        <action>Initiate an Ask-Discuss-Plan loop to surface ambiguities</action>
+        <details>
+          - Ask focused clarifying questions to align on feature requirements
+          - Provide 2-4 actionable options for each question
+          - Document assumptions and decisions in the plan
+          - Do not proceed until critical ambiguities are resolved
+        </details>
+        <expected_outcome>Clear, documented understanding of requirements and constraints</expected_outcome>
+      </step>
+
+      <step number="2">
+        <title>Environmental Mapping</title>
+        <action>Scan the repository structure to establish system of record</action>
+        <details>
+          - Map directory structure and key files
+          - Identify existing patterns, conventions, and architectural boundaries
+          - Establish AST symbols and module relationships
+          - Do not guess file paths or external dependencies
+        </details>
+        <expected_outcome>Complete environmental context without implementation changes</expected_outcome>
+      </step>
+
+      <step number="3">
+        <title>External Research (Optional)</title>
+        <action>When planning requires external context, conduct research via browser</action>
+        <details>
+          - GitHub research: search for top-starred repositories/libraries relevant to the topic
+            * Use GitHub search API or web search with sort=stars filter
+            * Identify reference implementations, best practices, and industry standards
+          - Google research: search for the top 5 most relevant results
+            * Prioritize official documentation, authoritative tutorials, and recent articles
+            * Capture URLs, titles, and key findings for each result
+          - Document all research findings in plan.md under a Research Findings section
+          - Use findings to inform architectural decisions and task decomposition
+        </details>
+        <expected_outcome>External references and research findings documented in plan.md</expected_outcome>
+      </step>
+
+      <step number="4">
+        <title>Constraint Verification</title>
+        <action>Ensure proposed scope respects protected boundaries</action>
+        <details>
+          - Verify no violations of security protocols
+          - Check alignment with existing architecture patterns
+          - Confirm file access permissions are sufficient for planning
+          - Identify any external dependencies that require coordination
+        </details>
+        <expected_outcome>Confirmed scope boundaries and known constraints</expected_outcome>
+      </step>
+    </phase>
+
+    <phase name="phase_2_architecture_analysis" number="2">
+      <description>Create Mermaid architecture diagram illustrating impact zones (MANDATORY per agentic-planning skill)</description>
+
+      <step number="1">
+        <title>Generate plan.md with YAML Frontmatter</title>
+        <action>Create formal specification with standardized YAML frontmatter</action>
+        <details>
+          - Include: Create Date, Update Date, IDE, Agent, GitHub committer
+          - Define clear objective and constraints sections
+          - Act as the living contract between human and agent
+          - Store in agentic/plan/ with timestamped naming
+        </details>
+        <artifact>agentic/plan/YYYYMMDD_timestamp_taskname.md</artifact>
+      </step>
+
+      <step number="2">
+        <title>Create Mermaid Architecture Diagram</title>
+        <action>Generate architecture diagram illustrating current state, impact zones, and new components</action>
+        <details>
+          - Current State: Existing codebase structure and data flow
+          - Impact Zone: Which files/modules will be affected by the changes
+          - New Components: New files, functions, or classes to be created
+          - Data Flow: How data moves through the system after changes
+        </details>
+        <diagram_requirements>
+          <requirement>Use high-contrast colors with black font on light backgrounds</requirement>
+          <requirement>Include file paths as node labels for clarity</requirement>
+          <requirement>Show direction of data flow with labeled arrows</requirement>
+          <requirement>Mark new components with [NEW] label</requirement>
+          <requirement>Mark modified components with [MOD] label</requirement>
+        </diagram_requirements>
+        <template>
+```mermaid
+flowchart TD
+    ComponentA["Component A (existing)"] -->|data| ComponentB["Component B (existing)"]
+    ComponentB -->|data| ComponentC["Component C [NEW]"]
+    ComponentD["Component D [MOD]"] -->|modified| ComponentA
+    
+    %% Styling
+    style ComponentA fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000000
+    style ComponentB fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#000000
+    style ComponentC fill:#c8e6c9,stroke:#2e7d32,stroke-width:3px,color:#000000
+    style ComponentD fill:#fff9c4,stroke:#f57f17,stroke-width:2px,color:#000000
+```
+        </template>
+        <expected_outcome>Mermaid diagram embedded in plan.md before task decomposition</expected_outcome>
+      </step>
+    </phase>
+
+    <phase name="phase_3_task_decomposition" number="3">
+      <description>Decompose into Hierarchical Task Network (DAG) with command-level granularity</description>
+
+      <step number="1">
+        <title>Decompose into Hierarchical Task Network</title>
+        <action>Break master goal into DAG of atomic sub-tasks</action>
+        <details>
+          - Each sub-task must follow the 10-Minute Rule:
+            - Scoped to 5-10 minute tool-use window
+            - Touch no more than 5 files
+          - Specify command-level granularity:
+            - Clear objective (single, well-defined outcome)
+            - Input contract (exact files with line ranges)
+            - Output contract (exact files to create/modify with line estimates)
+            - Exact commands (shell commands to execute)
+            - Expected output (success patterns)
+            - Fallback path (troubleshooting steps)
+          - Map explicit dependencies between sub-tasks
+        </details>
+        <expected_outcome>Complete DAG with entry/exit criteria for each phase</expected_outcome>
+      </step>
+
+      <step number="2">
+        <title>Apply Anti-Hallucination Checklist</title>
+        <action>Verify every sub-task meets 7B-model safety criteria</action>
+        <details>
+          - [ ] Task specifies exact file paths (relative to project root)
+          - [ ] Task specifies line ranges for files to read
+          - [ ] Task specifies estimated line count for files to create
+          - [ ] Task includes exact shell commands (copy-paste ready)
+          - [ ] Task includes expected output patterns to match
+          - [ ] Task includes fallback commands for common errors
+          - [ ] Task has no ambiguous language
+        </details>
+      </step>
+    </phase>
+
+    <phase name="phase_4_context_firewalling" number="4">
+      <description>Define least-context boundaries per sub-task</description>
+
+      <step number="1">
+        <title>Define Context Firewall</title>
+        <action>For each sub-task, define strict context boundaries</action>
+        <details>
+          - Explicitly list specific functions, types, and documentation files required
+          - Document what is OUT of scope for each sub-task
+          - Apply Principle of Least Context: inject only minimal required context
+        </details>
+        <expected_outcome>Per-task context firewall definitions preventing context rot</expected_outcome>
+      </step>
+
+      <step number="2">
+        <title>Information Sharding</title>
+        <action>Document context boundaries in plan for downstream workers</action>
+        <details>
+          - When execution begins, worker receives only minimal context
+          - Share context via structured outputs (JSON summaries, markdown files)
+          - Prevent reasoning drift through explicit boundaries
+        </details>
+      </step>
+    </phase>
+
+    <phase name="phase_5_hitl_gate" number="5">
+      <description>Produce artifacts and pause for human approval</description>
+
+      <step number="1">
+        <title>Artifact Handoff</title>
+        <action>Produce final planning artifacts</action>
+        <details>
+          - Implementation Plan (plan.md with YAML frontmatter)
+          - Task DAG (hierarchical decomposition with dependencies)
+          - Context Firewalls (per-task boundary definitions)
+          - Architecture Diagram (Mermaid diagram from Phase 2)
+          - Research Findings (external references if conducted)
+          - Daily standup report (if applicable for multi-day efforts)
+        </details>
+      </step>
+
+      <step number="2">
+        <title>Pause for Approval</title>
+        <action>Halt all activity and request human review</action>
+        <details>
+          - Output: "Plan generated at [path]. Please review and approve before implementation begins."
+          - Catching a flawed assumption during planning is exponentially cheaper than debugging later
+          - Do not proceed until explicit user sign-off
+        </details>
+        <expected_outcome>Explicit user approval to transition to Execution Mode</expected_outcome>
+      </step>
+
+      <step number="3">
+        <title>Transition Signal</title>
+        <action>After approval, signal readiness for PEV loop execution</action>
+        <details>
+          - Confirm plan.md is finalized and accessible
+          - Document which mode should handle execution handoff
+          - Note any special setup requirements for downstream agents
+        </details>
+      </step>
+    </phase>
+  </planning_cycle>
+
+  <pev_loop_handoff>
+    <description>After HITL approval, the plan transitions to Plan-Execute-Verify execution per agentic-planning skill</description>
+    <phase name="execute">
+      <description>Downstream execution mode implements each sub-task within its context firewall</description>
+    </phase>
+    <phase name="verify">
+      <description>Run deterministic verification commands specified in each sub-task</description>
+    </phase>
+    <phase name="self_correct">
+      <description>If verification fails, apply minimal fix and re-verify before proceeding</description>
+    </phase>
+  </pev_loop_handoff>
+
+  <completion_criteria>
+    <criterion>plan.md generated with complete YAML frontmatter</criterion>
+    <criterion>Mermaid architecture diagram included before task decomposition</criterion>
+    <criterion>DAG decomposition complete with all sub-tasks following 10-Minute Rule</criterion>
+    <criterion>Anti-Hallucination Checklist passed for all sub-tasks</criterion>
+    <criterion>Context Firewalls defined for every sub-task</criterion>
+    <criterion>Human approval received before implementation begins</criterion>
+    <criterion>Implementation completed according to the plan</criterion>
+  </completion_criteria>
+</workflow_instructions>

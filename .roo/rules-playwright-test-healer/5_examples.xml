@@ -1,0 +1,127 @@
+<complete_examples>
+  <example name="locator_healing">
+    <scenario>
+      Fix a test that fails due to UI changes.
+    </scenario>
+
+    <error_context>
+<![CDATA[
+Error: TimeoutError: Element not found: .btn-primary
+
+  at LoginPage.login (login_page.py:45)
+  at test_login_success (test_login.py:28)
+]]>
+    </error_context>
+
+    <trace_analysis>
+      <observation>Screenshot shows button exists but class changed</observation>
+      <observation>Button now has class "btn btn-primary" instead of "btn-primary"</observation>
+      <observation>Button has role="button" and text="Sign In"</observation>
+    </trace_analysis>
+
+    <fix_applied>
+<![CDATA[
+# Before
+@property
+def login_button(self):
+    """FN:login_button - Returns login button locator."""
+    return self.page.locator(".btn-primary")
+
+# After
+@property
+def login_button(self):
+    """FN:login_button - Returns login button locator."""
+    return self.page.get_by_role("button", name="Sign In")
+]]>
+    </fix_applied>
+
+    <key_takeaways>
+      <takeaway>CSS selectors break when styles change</takeaway>
+      <takeaway>Role-based locators are more resilient</takeaway>
+      <takeaway>Use semantic selectors that reflect user intent</takeaway>
+    </key_takeaways>
+  </example>
+
+  <example name="timing_healing">
+    <scenario>
+      Fix a flaky test with timing issues.
+    </scenario>
+
+    <error_context>
+<![CDATA[
+Error: AssertionError: Element not visible
+
+  at test_dashboard_load (test_dashboard.py:32)
+]]>
+    </error_context>
+
+    <trace_analysis>
+      <observation>Element exists in DOM but not visible</observation>
+      <observation>Element appears after animation completes</observation>
+      <observation>Network request completes before element renders</observation>
+    </trace_analysis>
+
+    <fix_applied>
+<![CDATA[
+# Before
+def test_dashboard_load(self, page: Page):
+    page.goto("/dashboard")
+    page.wait_for_timeout(2000)
+    assert page.locator(".dashboard").is_visible()
+
+# After
+from playwright.sync_api import expect
+
+def test_dashboard_load(self, page: Page):
+    page.goto("/dashboard")
+    expect(page.get_by_role("heading", name="Dashboard")).to_be_visible()
+]]>
+    </fix_applied>
+
+    <key_takeaways>
+      <takeaway>Hardcoded waits are unreliable</takeaway>
+      <takeaway>Use auto-waiting assertions</takeaway>
+      <takeaway>Wait for specific element, not arbitrary time</takeaway>
+    </key_takeaways>
+  </example>
+
+  <example name="data_healing">
+    <scenario>
+      Fix a test that fails due to stale test data.
+    </scenario>
+
+    <error_context>
+<![CDATA[
+Error: AssertionError: Expected "John Doe" but got ""
+
+  at test_user_profile (test_user.py:45)
+]]>
+    </error_context>
+
+    <trace_analysis>
+      <observation>Test expects user name to be "John Doe"</observation>
+      <observation>Database was reset, user name is now empty</observation>
+      <observation>Test data fixture needs update</observation>
+    </trace_analysis>
+
+    <fix_applied>
+<![CDATA[
+# Before
+def test_user_profile(self, page: Page):
+    page.goto("/profile")
+    expect(page.get_by_text("John Doe")).to_be_visible()
+
+# After
+def test_user_profile(self, page: Page, user_fixture: dict):
+    page.goto("/profile")
+    expect(page.get_by_text(user_fixture["name"])).to_be_visible()
+]]>
+    </fix_applied>
+
+    <key_takeaways>
+      <takeaway>Use fixtures for test data</takeaway>
+      <takeaway>Avoid hardcoded expected values</make>
+      <takeaway>Load expected data from fixtures</takeaway>
+    </key_takeaways>
+  </example>
+</complete_examples>

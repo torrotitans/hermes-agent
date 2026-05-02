@@ -1,0 +1,114 @@
+<decision_guidance>
+  <principles>
+    <principle>Prefer the smallest change that satisfies the request</principle>
+    <principle>Prefer a single source of truth; avoid duplicated rules across files</principle>
+    <principle>Ask a clarifying question only when critical ambiguity remains</principle>
+    <principle>Focus on OSI specification compliance and business clarity</principle>
+  </principles>
+
+  <dataset_design>
+    <decision name="fact_vs_dimension">
+      <question>Is this table a fact (measurable events) or dimension (descriptive context)?</question>
+      <guidance>
+        - Fact tables: contain numeric measures, foreign keys to dimensions, event-level rows
+        - Dimension tables: contain descriptive attributes, single primary key, slowly changing
+        - If uncertain, treat as dimension (safer for AI query generation)
+      </guidance>
+    </decision>
+
+    <decision name="primary_key_strategy">
+      <question>What uniquely identifies rows in this dataset?</question>
+      <guidance>
+        - Use simple primary_key for single-column identifiers
+        - Use composite primary_key when multiple columns are required
+        - Always document unique_keys as alternatives for relationship flexibility
+      </guidance>
+    </decision>
+
+    <decision name="source_format">
+      <question>How should the dataset source be referenced?</question>
+      <guidance>
+        - Use database.schema.table format when the physical location is known
+        - Use a query string when the source is a CTE or subquery
+        - Never use bare table names without schema qualification
+      </guidance>
+    </decision>
+  </dataset_design>
+
+  <field_design>
+    <decision name="field_vs_metric">
+      <question>Should this be a field or a metric?</question>
+      <guidance>
+        - Field: row-level attribute used for grouping, filtering, or in metric expressions
+        - Metric: aggregate calculation (SUM, AVG, COUNT, ratios) spanning rows
+        - If it requires an aggregate function, it is a metric
+        - If it is a per-row value, it is a field
+      </guidance>
+    </decision>
+
+    <decision name="time_dimension">
+      <question>Is this field a time-based dimension?</question>
+      <guidance>
+        - Set is_time: true for any date, datetime, year, quarter, month, or day field
+        - Do NOT set is_time: true for foreign keys to date tables (e.g., sold_date_sk)
+        - Only the actual date values in the date dimension should be marked as time
+      </guidance>
+    </decision>
+
+    <decision name="dialect_selection">
+      <question>Which SQL dialect(s) should be used for this expression?</question>
+      <guidance>
+        - Default to ANSI_SQL for maximum portability
+        - Add SNOWFLAKE dialect when using Snowflake-specific functions (e.g., TRY_CAST, GET_PATH)
+        - Add DATABRICKS dialect when using Databricks-specific syntax
+        - Only add multiple dialects when the expression differs across platforms
+      </guidance>
+    </decision>
+  </field_design>
+
+  <relationship_design>
+    <decision name="relationship_necessity">
+      <question>Should a relationship be defined between these two datasets?</question>
+      <guidance>
+        - Define relationships when a foreign key exists from fact to dimension
+        - Define relationships for all direct parent-child dataset pairs
+        - Do NOT define relationships for many-to-many without a bridge table
+      </guidance>
+    </decision>
+
+    <decision name="composite_vs_simple">
+      <question>Should this relationship use simple or composite keys?</question>
+      <guidance>
+        - Use simple keys when a single column uniquely identifies the relationship
+        - Use composite keys when multiple columns are required (e.g., product_id + variant_id)
+        - The number and order of from_columns must match to_columns exactly
+      </guidance>
+    </decision>
+  </relationship_design>
+
+  <metric_design>
+    <decision name="metric_expression_scope">
+      <question>Should this metric span one or multiple datasets?</question>
+      <guidance>
+        - Single-dataset metrics: use field names directly (e.g., SUM(sales.amount))
+        - Cross-dataset metrics: reference fields from related datasets using qualified names
+        - Ensure the relationship path between datasets is well-defined
+      </guidance>
+    </decision>
+  </metric_design>
+
+  <constraints>
+    <rule>OSI specification version 0.1.1 is the current standard</rule>
+    <rule>All entity names must be unique within their scope</rule>
+    <rule>Relationship from/to must reference existing dataset names</rule>
+    <rule>SQL expressions must be valid for the specified dialect</rule>
+    <rule>Vendor extensions must use valid vendor names from the enum</rule>
+  </constraints>
+
+  <validation>
+    <rule>After changes, run the OSI validator to confirm schema compliance</rule>
+    <rule>Scan for duplicate names across datasets, fields, metrics, and relationships</rule>
+    <rule>Verify all relationship references resolve to existing datasets</rule>
+    <rule>Update examples in 5_examples.xml to match new patterns</rule>
+  </validation>
+</decision_guidance>

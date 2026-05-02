@@ -1,0 +1,176 @@
+# Agentic Standards Hub
+
+Core guardrails for Torro development. Full specifications in [`agentic/AGENT.md`](agentic/AGENT.md), [`agentic/UI.md`](agentic/UI.md), [`agentic/mistakes.md`](agentic/mistakes.md).
+
+---
+
+## 1. Radical Simplicity
+
+- **File Limit**: All `.py` files MUST be under 200 lines. Refactor to `tasks/` if exceeded.
+- **FN: Prefix**: Every function/method docstring MUST start with `FN:function_name`.
+- **Type Hints**: Mandatory on all Python functions.
+- **No Print**: Use `logger.debug("FN:name ...")` exclusively.
+- **Doc Coverage**: Every function must have a docstring (purpose, params, returns).
+
+**Reference:** [`agentic/AGENT.md:26-95`](agentic/AGENT.md:26)
+
+---
+
+## 2. Architecture & Layering
+
+- **API Layer**: `/engine/api/` — HTTP handlers, validation (Pydantic V2), response formatting.
+- **Task Layer**: `/engine/api/*/tasks/` — Business logic orchestration.
+- **DB Layer**: `/engine/db/` — Data persistence, SQLModel operations.
+- **Direction**: API → Tasks → DB → Common/Utils. DB NEVER imports API.
+
+```mermaid
+graph TD
+    Client["Client / Agent"] -->|HTTP Request| API["API Layer (engine/api)"]
+    API -->|Validation & Auth| Tasks["Task Layer (tasks/)"]
+    Tasks -->|Business Logic| DB["DB Layer (engine/db)"]
+    DB -->|SQL/Data| Store[(Database)]
+    DB -->|Logic| Common["Common / Utils (engine/common)"]
+    
+    %% Forbidden Paths
+    DB -.->|❌ Forbidden| API
+    Tasks -.->|❌ Forbidden| API
+    
+    style API fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000000
+    style Tasks fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#000000
+    style DB fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#000000
+    style Store fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#000000
+    style Common fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000000
+```
+
+**Reference:** [`agentic/AGENT.md:96-131`](agentic/AGENT.md:96)
+
+---
+
+## 3. SQLModel Standard (MANDATORY)
+
+- **No Raw SQL**: Use `session.exec(select(Model))` — NEVER `session.execute(text(...))` or `session.query()`.
+- **Session-First**: CRUD functions MUST have `session: Session` as FIRST parameter.
+- **CRUD Isolation**: All DB logic in `engine/db/utils/db_core_crud.py`.
+- **Model Validation**: Use `Model.model_validate(payload)` to convert schemas.
+
+**Quick Reference:**
+
+| Pattern | Code |
+| :--- | :--- |
+| **Session DI** | `session: Session = Depends(get_session)` |
+| **List All** | `session.exec(select(Model)).all()` |
+| **Filter** | `session.exec(select(Model).where(Model.field == value)).first()` |
+
+**Reference:** [`agentic/AGENT.md:1345-1578`](agentic/AGENT.md:1345)
+
+---
+
+## 4. UI Standards (Apple Liquid Glass)
+
+- **Rounding**: `rounded-[14px]` for 40px items, `rounded-2xl` for panels.
+- **Ring Not Border**: Use `ring-1 ring-inset` for active states (preserves padding).
+- **Backdrop Blur**: `backdrop-blur-xl` for glass panels.
+- **Sidebar**: `bg-white/85`, `shadow-panel`, collapsed width 80px.
+- **Header**: `bg-torro-header` (#5C6BB5), `shadow-[0_4px_12px_rgba(0,0,0,0.15)]`.
+
+**Reference:** [`agentic/UI.md:272-395`](agentic/UI.md:272)
+
+---
+
+## 5. Testing Requirements
+
+- **Virtual Env**: All tests run in `.DEV` environment (auto-created if missing).
+- **Docker Gate**: Docker build verification MUST pass before tests.
+- **Test Data**: Store in `/assets/test_data/` by component.
+- **Reporting**: Logs in `/logs/tests/reports/` with timestamped files.
+- **Pre-Flight**: Test suite runs before main application initializes.
+
+**Reference:** [`agentic/AGENT.md:1150-1288`](agentic/AGENT.md:1150)
+
+---
+
+## 6. Security & Configuration
+
+- **No Secrets in Code**: All credentials via `config.ini` → `config.py` broker.
+- **Dependency Pinning**: All packages pinned in `requirements.txt` with CVE comments.
+- **Minimum Versions**:
+  - Flask ≥ 3.0.3
+  - Werkzeug ≥ 3.1.5
+  - Jinja2 ≥ 3.1.6
+  - cryptography ≥ 46.0.3
+
+**Reference:** [`agentic/AGENT.md:1658-1700`](agentic/AGENT.md:1658)
+
+---
+
+## 7. Observability & Logging
+
+- **FN: Prefix**: Every log MUST start with `FN:functionName`.
+- **Levels**: DEBUG (10), INFO (20), WARNING (30), ERROR (40).
+- **No Print**: Use `logger` exclusively.
+- **Correlation ID**: Include request ID in all logs.
+
+**Reference:** [`agentic/AGENT.md:1128-1149`](agentic/AGENT.md:1128)
+
+---
+
+## 8. Mistakes Prevention
+
+Before any UI or branding work, review [`agentic/mistakes.md`](agentic/mistakes.md).
+
+**Key Incidents:**
+- **M21**: Next.js standalone path misconfiguration
+- **M22**: Port conflicts between services
+- **M29**: Nested AppShell causing duplicates
+- **M32**: CSS fragmentation violations
+- **M34**: UI test drift and validation mismatches
+
+**Reference:** [`agentic/mistakes.md`](agentic/mistakes.md)
+
+---
+
+## 9. Skills Directory
+
+Detailed implementation skills live in `.roo/skills/`:
+
+| Skill | Purpose |
+| :--- | :--- |
+| `backend-architecture` | Layered architecture, SQLModel foundation |
+| `backend-coding-standards` | Naming, docstrings, file structure |
+| `backend-operations` | Dependency management, security |
+| `backend-testing` | TDD, test data, real-first strategy |
+| `nextjs-agentic` | Security, testing, AI guardrails |
+| `nextjs-enterprise` | App Router, performance, deployment |
+
+**Reference:** [`agentic/AGENT.md:5-15`](agentic/AGENT.md:5)
+
+---
+
+## Pre-Commit Checklist
+
+- [ ] All files under 200 lines (or refactored to `tasks/`)
+- [ ] All functions have `FN:` docstring prefix
+- [ ] No raw SQL (use SQLModel `select()`)
+- [ ] No print statements (use logger)
+- [ ] Type hints on all functions
+- [ ] Docker build passes: `bash scripts/docker-build-verify.sh --all`
+- [ ] Tests pass: `python3 tests/main.py`
+- [ ] No secrets in code (check `config.ini`)
+- [ ] Dependencies pinned with CVE comments
+
+---
+
+## UI Work Checklist
+
+- [ ] Review [`agentic/UI.md`](agentic/UI.md) before any UI modification
+- [ ] Use `rounded-[14px]` for 40px icon containers
+- [ ] Use `ring` NOT `border` for active states
+- [ ] Apply `backdrop-blur-xl` for glass panels
+- [ ] Verify Apple Liquid Glass compliance
+- [ ] Check [`agentic/mistakes.md`](agentic/mistakes.md) for past UI violations
+
+---
+
+**Version:** 2.0  
+**Last Updated:** 2026-04-25  
+**Compliance:** Run `python3 agentic/compliance/verify_all.py`

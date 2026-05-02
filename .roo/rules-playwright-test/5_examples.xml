@@ -1,0 +1,237 @@
+<complete_examples>
+  <example name="user_story_to_test">
+    <scenario>
+      Translate a user story about login functionality into a Playwright test.
+    </scenario>
+
+    <user_story>
+      As a registered user, I want to log in with my credentials so that I can access my personalized dashboard.
+      
+      Acceptance Criteria:
+      - Login form has username and password fields
+      - Login button is enabled when both fields are filled
+      - Successful login redirects to dashboard
+      - Failed login shows error message
+    </user_story>
+
+    <workflow>
+      <step number="1">
+        <description>Analyze user story</description>
+        <approach>
+          Identify UI elements:
+          - Username input field
+          - Password input field
+          - Login button
+          - Error message container
+          - Dashboard page (redirect target)
+        </approach>
+      </step>
+
+      <step number="2">
+        <description>Create Page Object</description>
+        <approach>
+          Create LoginPage class with:
+          - Locators for username, password, button
+          - Methods: navigate(), login(), verify_loaded(), get_error_message()
+        </approach>
+        <artifact>
+          <![CDATA[
+# FN:login_page.py
+"""
+FN:login_page.py
+Contains 1 class. Page Object for Login Page.
+
+Primary: LoginPage.__init__
+
+Classes:
+- LoginPage: Page Object for Login Page
+
+Functions:
+- FN:__init__: Initialize LoginPage (lines 32-38)
+- FN:navigate: Navigate to login page (lines 40-47)
+- FN:verify_loaded: Verify page loaded (lines 49-60)
+- FN:login: Perform login action (lines 79-95)
+"""
+
+from playwright.sync_api import Page, expect
+import re
+
+class LoginPage:
+    """FN:LoginPage - Page Object for Login Page."""
+    
+    def __init__(self, page: Page):
+        """FN:__init__ - Initialize with Page instance."""
+        self.page = page
+    
+    def navigate(self):
+        """FN:navigate - Navigate to login page."""
+        self.page.goto(f"{self.base_url}/login")
+    
+    def verify_loaded(self):
+        """FN:verify_loaded - Verify page is loaded."""
+        expect(self.page).to_have_title(
+            re.compile(r"Login|Sign In", re.IGNORECASE)
+        )
+        expect(self.username_input).to_be_visible()
+        expect(self.password_input).to_be_visible()
+        expect(self.login_button).to_be_visible()
+    
+    @property
+    def username_input(self):
+        """FN:username_input - Returns username input locator."""
+        return self.page.get_by_label("Username")
+    
+    @property
+    def password_input(self):
+        """FN:password_input - Returns password input locator."""
+        return self.page.get_by_label("Password")
+    
+    @property
+    def login_button(self):
+        """FN:login_button - Returns login button locator."""
+        return self.page.get_by_role("button", name="Sign In")
+    
+    def login(self, username: str, password: str):
+        """FN:login - Perform login with credentials."""
+        self.username_input.fill(username)
+        self.password_input.fill(password)
+        self.login_button.click()
+          ]]>
+        </artifact>
+      </step>
+
+      <step number="3">
+        <description>Write test file</description>
+        <approach>
+          Create test_login.py with:
+          - FN: documentation headers
+          - Test for successful login
+          - Test for failed login
+        </approach>
+        <artifact>
+          <![CDATA[
+# FN:test_login.py
+"""
+FN:test_login.py
+Contains 1 class. Tests for Login functionality.
+
+Primary: TestLogin.test_login_success
+
+Classes:
+- TestLogin: Test suite for Login (lines 20-80)
+
+Functions:
+- FN:test_login_success: Test successful login (lines 26-45)
+- FN:test_login_failure: Test failed login (lines 47-65)
+"""
+
+import pytest
+from playwright.sync_api import Page, expect
+from tests.e2e.ui.pages.login_page import LoginPage
+
+class TestLogin:
+    """FN:TestLogin - Test suite for Login functionality."""
+    
+    def test_login_success(self, page: Page, base_url: str, login_payload: dict):
+        """FN:test_login_success - Verify successful login redirects to dashboard."""
+        # Arrange
+        login_page = LoginPage(page)
+        
+        # Act
+        login_page.navigate()
+        login_page.login(
+            login_payload["username"],
+            login_payload["password"]
+        )
+        
+        # Assert
+        expect(page).to_have_url("/dashboard")
+        expect(page.get_by_text("Welcome")).to_be_visible()
+    
+    def test_login_failure(self, page: Page, base_url: str):
+        """FN:test_login_failure - Verify failed login shows error."""
+        # Arrange
+        login_page = LoginPage(page)
+        
+        # Act
+        login_page.navigate()
+        login_page.login("invalid", "wrong")
+        
+        # Assert
+        expect(login_page.get_error_message()).to_be_visible()
+        expect(login_page.get_error_message()).to_have_text(
+            "Invalid credentials"
+        )
+          ]]>
+        </artifact>
+      </step>
+    </workflow>
+
+    <key_takeaways>
+      <takeaway>Page Objects encapsulate UI structure and interactions</takeaway>
+      <takeaway>Tests should be readable and document intent</takeaway>
+      <takeaway>Use fixtures for test data management</takeaway>
+      <takeaway>FN: headers enable agent understanding</takeaway>
+    </key_takeaways>
+  </example>
+
+  <example name="dashboard_test">
+    <scenario>
+      Test dashboard functionality with data verification.
+    </scenario>
+
+    <user_story>
+      As a dashboard user, I want to see my recent activities so that I can track my work.
+      
+      Acceptance Criteria:
+      - Dashboard displays activity list
+      - Each activity shows title and timestamp
+      - Activities are sorted by date (newest first)
+    </user_story>
+
+    <test_implementation>
+      <![CDATA[
+# FN:test_dashboard.py
+"""
+FN:test_dashboard.py
+Contains 1 class. Tests for Dashboard functionality.
+
+Primary: TestDashboard.test_activities_display
+
+Classes:
+- TestDashboard: Test suite for Dashboard (lines 20-70)
+
+Functions:
+- FN:test_activities_display: Verify activities display (lines 26-50)
+"""
+
+import pytest
+from playwright.sync_api import Page, expect
+from tests.e2e.ui.pages.dashboard_page import DashboardPage
+
+class TestDashboard:
+    """FN:TestDashboard - Test suite for Dashboard functionality."""
+    
+    def test_activities_display(self, page: Page, base_url: str, auth_fixture: dict):
+        """FN:test_activities_display - Verify activities are displayed correctly."""
+        # Arrange
+        dashboard = DashboardPage(page)
+        
+        # Act - Navigate to dashboard
+        dashboard.navigate(base_url)
+        dashboard.wait_for_loaded()
+        
+        # Assert - Activities are visible
+        expect(dashboard.activity_list).to_be_visible()
+        expect(dashboard.activity_items).to_have_count(
+            auth_fixture["expected_activity_count"]
+        )
+        
+        # Assert - Activities have required fields
+        first_activity = dashboard.activity_items.first
+        expect(first_activity.get_by_test_id("title")).to_be_visible()
+        expect(first_activity.get_by_test_id("timestamp")).to_be_visible()
+      ]]>
+    </test_implementation>
+  </example>
+</complete_examples>

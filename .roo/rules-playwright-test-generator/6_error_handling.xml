@@ -1,0 +1,42 @@
+<error_handling>
+  <common_errors>
+    <error name="locator_not_found">
+      <description>Cannot find element with specified locator</description>
+      <causes>
+        <cause>Element not yet rendered</cause>
+        <cause>Wrong locator strategy</cause>
+        <cause>Element in different frame</cause>
+      </causes>
+      <solutions>
+        <solution>Use auto-waiting assertions</solution>
+        <solution>Verify locator matches visible text or role</solution>
+        <solution>Add frame handling if needed</solution>
+      </solutions>
+    </error>
+
+    <error name="spec_mismatch">
+      <description>Generated test doesn't match spec</description>
+      <causes>
+        <cause>Misunderstood spec requirements</cause>
+        <cause>Missing expected results</cause>
+        <cause>Incorrect assertion type</cause>
+      </causes>
+      <solutions>
+        <solution>Re-read spec scenario carefully</solution>
+        <solution>Map each expected result to an assertion</solution>
+        <solution>Verify test covers all acceptance criteria</solution>
+      </solutions>
+    </error>
+  </common_errors>
+
+  <debugging_strategies>
+    <strategy name="trace_viewer">
+      <description>Use Playwright Trace Viewer for debugging</description>
+      <steps>
+        <step>Run test with --trace on flag</step>
+        <step>Open trace with playwright show-trace</step>
+        <step>Review timeline, screenshots, and network logs</step>
+      </steps>
+    </strategy>
+  </debugging_strategies>
+</error_handling>

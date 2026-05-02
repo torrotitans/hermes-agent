@@ -1,0 +1,140 @@
+<complete_examples>
+  <example name="login_test_generation">
+    <scenario>
+      Generate tests from a login specification.
+    </scenario>
+
+    <spec_input>
+<![CDATA[
+### 1.1 Login With Valid Credentials
+
+**Steps:**
+1. Navigate to login page
+2. Enter valid username in username field
+3. Enter valid password in password field
+4. Click Sign In button
+
+**Expected Results:**
+- User is redirected to dashboard
+- Welcome message is displayed with user name
+- User menu shows logged-in user details
+]]>
+    </spec_input>
+
+    <test_output>
+<![CDATA[
+# FN:test_login.py
+"""
+FN:test_login.py
+Contains 1 class. Tests for Login functionality.
+
+Primary: TestLogin.test_login_with_valid_credentials
+
+Classes:
+- TestLogin: Test suite for Login (lines 20-60)
+
+Functions:
+- FN:test_login_with_valid_credentials: Verify login redirects to dashboard (lines 26-45)
+"""
+
+import pytest
+from playwright.sync_api import Page, expect
+from tests.e2e.ui.pages.login_page import LoginPage
+
+class TestLogin:
+    """FN:TestLogin - Test suite for Login functionality."""
+    
+    def test_login_with_valid_credentials(self, page: Page, base_url: str, login_payload: dict):
+        """FN:test_login_with_valid_credentials - Verify login redirects to dashboard."""
+        # Arrange
+        login_page = LoginPage(page)
+        
+        # Act
+        login_page.navigate()
+        login_page.login(login_payload["username"], login_payload["password"])
+        
+        # Assert
+        expect(page).to_have_url("/dashboard")
+        expect(page.get_by_text("Welcome")).to_be_visible()
+]]>
+    </test_output>
+
+    <key_takeaways>
+      <takeaway>Each spec scenario becomes a test function</takeaway>
+      <takeaway>Steps become Arrange-Act-Assert structure</takeaway>
+      <takeaway>Expected results become assertions</takeaway>
+      <takeaway>Use fixtures for test data</takeaway>
+    </key_takeaways>
+  </example>
+
+  <example name="page_object_generation">
+    <scenario>
+      Create Page Object for login page.
+    </scenario>
+
+    <spec_input>
+<![CDATA[
+UI Elements:
+- Username input field
+- Password input field
+- Sign In button
+- Error message container
+]]>
+    </spec_input>
+
+    <page_object_output>
+<![CDATA[
+# FN:login_page.py
+"""
+FN:login_page.py
+Contains 1 class. Page Object for Login Page.
+
+Primary: LoginPage.__init__
+
+Classes:
+- LoginPage: Page Object for Login Page
+
+Functions:
+- FN:__init__: Initialize LoginPage (lines 32-38)
+- FN:navigate: Navigate to login page (lines 40-47)
+- FN:login: Perform login action (lines 79-95)
+"""
+
+from playwright.sync_api import Page, expect
+import re
+
+class LoginPage:
+    """FN:LoginPage - Page Object for Login Page."""
+    
+    def __init__(self, page: Page):
+        """FN:__init__ - Initialize with Page instance."""
+        self.page = page
+    
+    def navigate(self):
+        """FN:navigate - Navigate to login page."""
+        self.page.goto(f"{self.base_url}/login")
+    
+    @property
+    def username_input(self):
+        """FN:username_input - Returns username input locator."""
+        return self.page.get_by_label("Username")
+    
+    @property
+    def password_input(self):
+        """FN:password_input - Returns password input locator."""
+        return self.page.get_by_label("Password")
+    
+    @property
+    def login_button(self):
+        """FN:login_button - Returns login button locator."""
+        return self.page.get_by_role("button", name="Sign In")
+    
+    def login(self, username: str, password: str):
+        """FN:login - Perform login with credentials."""
+        self.username_input.fill(username)
+        self.password_input.fill(password)
+        self.login_button.click()
+]]>
+    </page_object_output>
+  </example>
+</complete_examples>

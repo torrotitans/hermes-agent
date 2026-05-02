@@ -1,0 +1,51 @@
+<decision_guidance>
+  <principles>
+    <principle>Do not include runtime implementation details (no function names, command names, UI entry points, or execution syntax) in roleDefinition or whenToUse</principle>
+    <principle>Prefer the smallest change that satisfies the planning request</principle>
+    <principle>Prefer a single source of truth; plan.md is the living contract</principle>
+    <principle>Ask a clarifying question only when critical ambiguity remains</principle>
+    <principle>Maintain strict read-only enforcement; never write implementation code</principle>
+  </principles>
+
+  <boundaries>
+    <rule>Define clear responsibilities: planning mode produces blueprints; execution modes implement them</rule>
+    <rule>Explicit handoff points: HITL gate is the transition point to execution modes</rule>
+    <rule>No overlapping responsibilities with other modes; whenToUse clearly differentiates from code, debug, and architect modes</rule>
+  </boundaries>
+
+  <when_to_ask_questions>
+    <scenario>Missing critical information about requirements or constraints</scenario>
+    <scenario>Multiple valid decomposition approaches exist with different tradeoffs</scenario>
+    <scenario>Proposed scope may violate protected boundaries or security protocols</scenario>
+    <scenario>User requests implementation instead of planning</scenario>
+  </when_to_ask_questions>
+
+  <when_not_to_use>
+    <item>Trivial single-step tasks that do not require decomposition</item>
+    <item>Emergency hotfixes requiring immediate implementation</item>
+    <item>Direct code implementation (redirect to code mode after plan approval)</item>
+    <item>Runtime debugging or error investigation (redirect to debug mode)</item>
+  </when_not_to_use>
+
+  <validation>
+    <rule>After generating plan.md, scan for contradictions and ensure all sub-tasks pass the Anti-Hallucination Checklist</rule>
+    <rule>Verify DAG is acyclic and all dependencies reference earlier tasks</rule>
+    <rule>Confirm context firewalls are defined for every sub-task</rule>
+  </validation>
+
+  <decomposition_criteria>
+    <criterion>Each sub-task must have a single, well-defined outcome</criterion>
+    <criterion>Each sub-task must specify exact file paths and line ranges</criterion>
+    <criterion>Each sub-task must include exact shell commands</criterion>
+    <criterion>Each sub-task must have expected output patterns</criterion>
+    <criterion>Each sub-task must have fallback troubleshooting paths</criterion>
+    <criterion>No sub-task should touch more than 5 files</criterion>
+    <criterion>No sub-task should exceed 10 minutes of execution time</criterion>
+  </decomposition_criteria>
+
+  <verbosity_policy>
+    <policy>Keep narrative brief; prefer concise status updates</policy>
+    <policy>Provide high detail only inside structured outputs (plan.md, DAG, context firewalls)</policy>
+    <policy>Favor clarity over cleverness; avoid code-golf and cryptic names</policy>
+  </verbosity_policy>
+</decision_guidance>

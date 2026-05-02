@@ -1,0 +1,359 @@
+# OSI Semantic Model Example
+# E-commerce Analytics Semantic Model
+# This example demonstrates all core OSI constructs
+
+semantic_model:
+  - name: ecommerce_analytics
+    description: E-commerce sales and customer analytics model
+    ai_context:
+      instructions: "Use this model for analyzing sales trends, customer behavior, and product performance. Focus on revenue metrics and customer segmentation."
+      synonyms:
+        - "sales analytics"
+        - "e-commerce data"
+        - "online retail"
+      examples:
+        - "Show total revenue by month"
+        - "What are the top selling products?"
+        - "Calculate customer lifetime value"
+
+    datasets:
+      - name: orders
+        source: analytics.public.orders
+        primary_key: [order_id]
+        unique_keys:
+          - [order_id]
+          - [order_number]
+        description: Customer orders with line items
+        ai_context:
+          synonyms:
+            - "purchases"
+            - "sales transactions"
+            - "orders placed"
+          examples:
+            - "Find orders from last week"
+            - "Show order details"
+        fields:
+          - name: order_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: order_id
+                - dialect: SNOWFLAKE
+                  expression: ORDER_ID
+            description: Unique order identifier
+          - name: order_number
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: order_number
+                - dialect: SNOWFLAKE
+                  expression: ORDER_NUMBER
+            description: Human-readable order number
+          - name: customer_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: customer_id
+                - dialect: SNOWFLAKE
+                  expression: CUSTOMER_ID
+            description: Customer identifier (foreign key)
+          - name: order_date
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: order_date
+                - dialect: SNOWFLAKE
+                  expression: ORDER_DATE
+            description: Date order was placed
+            dimension:
+              is_time: true
+          - name: amount
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: amount
+                - dialect: SNOWFLAKE
+                  expression: AMOUNT
+            description: Order total amount
+          - name: status
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: status
+                - dialect: SNOWFLAKE
+                  expression: STATUS
+            description: Order status (pending, shipped, delivered)
+
+      - name: customers
+        source: analytics.public.customers
+        primary_key: [id]
+        description: Customer information and profiles
+        ai_context:
+          synonyms:
+            - "users"
+            - "clients"
+            - "buyers"
+        fields:
+          - name: id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: id
+                - dialect: SNOWFLAKE
+                  expression: ID
+            description: Unique customer identifier
+          - name: email
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: email
+                - dialect: SNOWFLAKE
+                  expression: EMAIL
+            description: Customer email address
+          - name: first_name
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: first_name
+                - dialect: SNOWFLAKE
+                  expression: FIRST_NAME
+            description: Customer first name
+          - name: last_name
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: last_name
+                - dialect: SNOWFLAKE
+                  expression: LAST_NAME
+            description: Customer last name
+          - name: created_at
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: created_at
+                - dialect: SNOWFLAKE
+                  expression: CREATED_AT
+            description: Customer registration date
+            dimension:
+              is_time: true
+
+      - name: products
+        source: analytics.public.products
+        primary_key: [product_id]
+        description: Product catalog
+        ai_context:
+          synonyms:
+            - "items"
+            - "merchandise"
+            - "goods"
+        fields:
+          - name: product_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: product_id
+                - dialect: SNOWFLAKE
+                  expression: PRODUCT_ID
+            description: Unique product identifier
+          - name: name
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: name
+                - dialect: SNOWFLAKE
+                  expression: NAME
+            description: Product name
+          - name: category
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: category
+                - dialect: SNOWFLAKE
+                  expression: CATEGORY
+            description: Product category
+          - name: price
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: price
+                - dialect: SNOWFLAKE
+                  expression: PRICE
+            description: Product price
+
+      - name: order_items
+        source: analytics.public.order_items
+        primary_key: [order_item_id]
+        description: Individual items within orders
+        fields:
+          - name: order_item_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: order_item_id
+                - dialect: SNOWFLAKE
+                  expression: ORDER_ITEM_ID
+            description: Unique order item identifier
+          - name: order_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: order_id
+                - dialect: SNOWFLAKE
+                  expression: ORDER_ID
+            description: Parent order identifier
+          - name: product_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: product_id
+                - dialect: SNOWFLAKE
+                  expression: PRODUCT_ID
+            description: Product identifier
+          - name: quantity
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: quantity
+                - dialect: SNOWFLAKE
+                  expression: QUANTITY
+            description: Quantity ordered
+          - name: unit_price
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: unit_price
+                - dialect: SNOWFLAKE
+                  expression: UNIT_PRICE
+            description: Price per unit
+
+    relationships:
+      - name: orders_to_customers
+        from: orders
+        to: customers
+        from_columns: [customer_id]
+        to_columns: [id]
+        ai_context:
+          description: "Links orders to the customers who placed them"
+
+      - name: order_items_to_orders
+        from: order_items
+        to: orders
+        from_columns: [order_id]
+        to_columns: [order_id]
+        ai_context:
+          description: "Links order items to their parent orders"
+
+      - name: order_items_to_products
+        from: order_items
+        to: products
+        from_columns: [product_id]
+        to_columns: [product_id]
+        ai_context:
+          description: "Links order items to the products ordered"
+
+    metrics:
+      - name: total_revenue
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: SUM(orders.amount)
+            - dialect: SNOWFLAKE
+              expression: SUM(orders.amount)
+        description: Total revenue from all orders
+        ai_context:
+          synonyms:
+            - "total sales"
+            - "revenue"
+            - "gross sales"
+          examples:
+            - "What is the total revenue?"
+            - "Show revenue for this quarter"
+
+      - name: order_count
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: COUNT(DISTINCT orders.order_id)
+            - dialect: SNOWFLAKE
+              expression: COUNT(DISTINCT orders.order_id)
+        description: Total number of orders
+        ai_context:
+          synonyms:
+            - "number of orders"
+            - "order volume"
+
+      - name: customer_count
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: COUNT(DISTINCT customers.id)
+            - dialect: SNOWFLAKE
+              expression: COUNT(DISTINCT customers.id)
+        description: Total number of unique customers
+        ai_context:
+          synonyms:
+            - "unique customers"
+            - "customer base"
+
+      - name: average_order_value
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: SUM(orders.amount) / COUNT(DISTINCT orders.order_id)
+            - dialect: SNOWFLAKE
+              expression: SUM(orders.amount) / COUNT(DISTINCT orders.order_id)
+        description: Average value per order
+        ai_context:
+          synonyms:
+            - "AOV"
+            - "avg order size"
+
+      - name: items_per_order
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: SUM(order_items.quantity) / COUNT(DISTINCT orders.order_id)
+            - dialect: SNOWFLAKE
+              expression: SUM(order_items.quantity) / COUNT(DISTINCT orders.order_id)
+        description: Average number of items per order
+        ai_context:
+          synonyms:
+            - "units per order"
+            - "basket size"
+
+      - name: customer_lifetime_value
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: SUM(orders.amount) / COUNT(DISTINCT customers.id)
+            - dialect: SNOWFLAKE
+              expression: SUM(orders.amount) / COUNT(DISTINCT customers.id)
+        description: Average revenue per customer
+        ai_context:
+          synonyms:
+            - "CLV"
+            - "LTV"
+            - "customer value"
+
+    custom_extensions:
+      - vendor_name: SNOWFLAKE
+        data: |
+          {
+            "warehouse": "ANALYTICS_WH",
+            "database": "ANALYTICS",
+            "schema": "PUBLIC"
+          }
+      - vendor_name: DBT
+        data: |
+          {
+            "project_name": "ecommerce_analytics",
+            "materialized": "table",
+            "tags": ["daily", "core", "sales"]
+          }
+      - vendor_name: DATABRICKS
+        data: |
+          {
+            "default_catalog": "analytics",
+            "default_schema": "gold",
+            "cluster_id": "analytics-cluster"
+          }

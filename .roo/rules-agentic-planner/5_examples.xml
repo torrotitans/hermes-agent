@@ -1,0 +1,246 @@
+<complete_examples>
+  <example name="feature_planning_with_dag">
+    <scenario>
+      User requests planning for a multi-phase feature: implement JWT-based authentication for the user login flow.
+    </scenario>
+    <user_request>
+      I want to plan the implementation of JWT authentication for our login system.
+    </user_request>
+    <workflow>
+      <step number="1">
+        <description>Phase 1: Ask & Discover</description>
+        <approach>
+          Ask clarifying questions to resolve scope:
+          - Which login endpoint needs JWT integration?
+          - Are there existing auth utilities to reference?
+          - What token lifetime and signing algorithm?
+        </approach>
+        <expected_outcome>Requirements documented: src/api/login/interface_login.py, existing src/utils/ patterns, HS256 with 1-hour expiry</expected_outcome>
+      </step>
+
+      <step number="2">
+        <description>Phase 2: Spec-Driven Decomposition</description>
+        <approach>
+          Generate plan.md with YAML frontmatter and DAG decomposition:
+        </approach>
+        <artifact>
+          ---
+          Create Date: 2026-04-24
+          Update Date: 2026-04-24
+          IDE: Roo Code
+          Agent: Qwen3-7B-Architect
+          GitHub committer: John Doe
+          Sprint: Sprint #24
+          ---
+
+          # Plan: Implement JWT Authentication
+
+          ## Objective
+          Implement JWT-based authentication for the user login flow.
+
+          ## Constraints
+          - Max context per task: 128k tokens
+          - Max execution time per task: 10 minutes
+          - Max files per task: 5 files
+          - Anti-hallucination: All tasks must specify exact commands and line numbers
+
+          ## Tasks (DAG)
+
+          ### Phase 1: JWT Utility Module
+          - **Token Budget:** 1M
+          - **Entry Criteria:** requirements.txt has PyJWT dependency
+          - **Exit Criteria:** jwt_utils.py functional with passing tests
+
+          ### Task 1: Create JWT Utility Module
+          - [ ] Status: Pending
+          - **Objective:** Create src/utils/jwt_utils.py with encode_token() and decode_token() functions
+          - **Input Contract:**
+            - Read: requirements.txt (lines 1-20 for dependencies)
+            - Read: src/utils/__init__.py (lines 1-15 for export pattern)
+          - **Output Contract:**
+            - Create: src/utils/jwt_utils.py (~80 lines)
+            - Modify: src/utils/__init__.py (add jwt_utils exports at line 5)
+          - **Exact Commands:**
+            ```bash
+            # Step 1: Verify PyJWT is installed
+            pip show PyJWT
+
+            # Step 2: Create the file
+            touch src/utils/jwt_utils.py
+
+            # Step 3: Run verification
+            python3 -m pytest tests/unit/test_jwt_utils.py::test_encode_token -v
+            ```
+          - **Expected Output:** 1 passed in 0.52s
+          - **Fallback Path:** If ModuleNotFoundError, run pip install PyJWT==2.8.0
+          - **Dependencies:** None
+          - **Estimated Time:** 5 minutes
+          - **Context Firewall:**
+            - Required: requirements.txt, src/utils/__init__.py
+            - Excluded: src/api/, tests/integration/
+
+          ### Task 2: Update Login Interface
+          - [ ] Status: Pending
+          - **Objective:** Modify src/api/login/interface_login.py to use JWT utility
+          - **Input Contract:**
+            - Read: src/utils/jwt_utils.py (lines 1-80, complete file)
+            - Read: src/api/login/interface_login.py (lines 1-50)
+          - **Output Contract:**
+            - Modify: src/api/login/interface_login.py (add import at line 5, add JWT encoding at line 35)
+          - **Exact Commands:**
+            ```bash
+            # Step 1: Verify the import was added
+            grep -n "from src.utils.jwt_utils import" src/api/login/interface_login.py
+
+            # Step 2: Run verification
+            python3 -m pytest tests/unit/test_login.py::test_login_returns_jwt -v
+            ```
+          - **Expected Output:** 1 passed in 0.68s
+          - **Fallback Path:** If test fails, check line 35 has token = encode_token(user_id)
+          - **Dependencies:** Task 1
+          - **Estimated Time:** 7 minutes
+          - **Context Firewall:**
+            - Required: src/utils/jwt_utils.py, src/api/login/interface_login.py
+            - Excluded: src/api/bulk_upload/, services/
+
+          ### Task 3: Add Unit Tests for JWT
+          - [ ] Status: Pending
+          - **Objective:** Create comprehensive unit tests for JWT utilities
+          - **Input Contract:**
+            - Read: src/utils/jwt_utils.py (lines 1-80, complete file)
+            - Read: tests/unit/test_auth.py (lines 1-40 for test patterns)
+          - **Output Contract:**
+            - Create: tests/unit/test_jwt_utils.py (~60 lines)
+          - **Exact Commands:**
+            ```bash
+            # Step 1: Create test file
+            touch tests/unit/test_jwt_utils.py
+
+            # Step 2: Run verification with coverage
+            python3 -m pytest tests/unit/test_jwt_utils.py -v --cov=src/utils/jwt_utils --cov-report=term-missing
+            ```
+          - **Expected Output:** 2 passed in 0.45s with 100% coverage
+          - **Fallback Path:** If coverage < 100%, add test cases for missing lines shown in output
+          - **Dependencies:** Task 1
+          - **Estimated Time:** 8 minutes
+          - **Context Firewall:**
+            - Required: src/utils/jwt_utils.py, tests/unit/test_auth.py
+            - Excluded: src/api/, services/
+        </artifact>
+      </step>
+
+      <step number="3">
+        <description>Phase 3: Context Firewalling</description>
+        <approach>
+          Verify context firewalls are defined for each sub-task (already included in plan.md above).
+        </approach>
+      </step>
+
+      <step number="4">
+        <description>Phase 4: HITL Gate</description>
+        <approach>
+          Pause for approval:
+        </approach>
+        <expected_outcome>"Plan generated at agentic/plan/20260424_170000_jwt_auth.md. Please review and approve before implementation begins."</expected_outcome>
+      </step>
+    </workflow>
+
+    <completion>
+      Plan generated with 3-phase DAG, context firewalls for each task, and explicit handoff to execution mode.
+    </completion>
+
+    <key_takeaways>
+      <takeaway>Every sub-task specifies exact commands, line ranges, and fallback paths</takeaway>
+      <takeaway>Context firewalls prevent reasoning drift in downstream agents</takeaway>
+      <takeaway>HITL gate ensures human approval before execution transition</takeaway>
+    </key_takeaways>
+  </example>
+
+  <example name="daily_standup_report">
+    <scenario>
+      End of work day - generate daily standup report for ongoing JWT authentication feature.
+    </scenario>
+    <user_request>
+      Generate daily standup report.
+    </user_request>
+    <workflow>
+      <step number="1">
+        <description>Read current plan.md to assess task completion status</description>
+        <approach>
+          Parse plan.md YAML frontmatter and task checkboxes to determine:
+          - Tasks completed (marked [x])
+          - Tasks in progress (marked [-])
+          - Tasks blocked (marked [!])
+          - Tasks pending (marked [ ])
+        </approach>
+      </step>
+
+      <step number="2">
+        <description>Generate standup report</description>
+        <approach>
+          Create agentic/plan/standup_YYYYMMDD.md with structured tables
+        </approach>
+        <artifact>
+          ---
+          Date: 2026-04-24
+          Sprint: Sprint #24
+          Plan File: agentic/plan/20260424_170000_jwt_auth.md
+          ---
+
+          # Daily Standup Report - 2026-04-24
+
+          ## Yesterday's Progress (Completed Tasks)
+
+          | Task ID | Task Name | Status | Time Taken | Verification |
+          |---------|-----------|--------|------------|--------------|
+          | T1 | Create JWT utility module | DONE | 8 min | pytest passed |
+          | T2 | Update login interface | DONE | 12 min | pytest passed |
+
+          ## Today's Plan (Pending Tasks)
+
+          | Task ID | Task Name | Priority | Dependencies | Est. Time |
+          |---------|-----------|----------|--------------|-----------|
+          | T3 | Add unit tests for JWT | High | T1 | 10 min |
+          | T4 | Update documentation | Medium | T1, T3 | 5 min |
+
+          ## Blockers
+
+          - [ ] None
+
+          ## Next Day Plan
+
+          - Complete Task T3: Add unit tests for JWT
+            - Command: python3 -m pytest tests/unit/test_jwt_utils.py -v --cov=src/utils/jwt_utils
+            - Expected: 2 passed in 0.45s with 100% coverage
+          - Complete Task T4: Update README with JWT usage examples
+            - Command: grep -n "JWT" docs/README.md to verify additions at line 25-40
+
+          ## Metrics
+
+          - Tasks Completed: 2
+          - Tasks Pending: 2
+          - Blockers: 0
+          - Total Time Spent: 20 min
+          - Sprint Progress: 2/10 tasks (20%)
+        </artifact>
+      </step>
+
+      <step number="3">
+        <description>Archive current day's plan and create new plan for next day</description>
+        <approach>
+          Move completed plan to agentic/plan/archive/ and update main plan's Update Date
+        </approach>
+      </step>
+    </workflow>
+
+    <completion>
+      Standup report generated with Jira-style tables, metrics, and next-day plan.
+    </completion>
+
+    <key_takeaways>
+      <takeaway>Standup reports provide structured progress visibility</takeaway>
+      <takeaway>Archive maintains clean workspace for active plans</takeaway>
+      <takeaway>Metrics enable sprint progress tracking</takeaway>
+    </key_takeaways>
+  </example>
+</complete_examples>

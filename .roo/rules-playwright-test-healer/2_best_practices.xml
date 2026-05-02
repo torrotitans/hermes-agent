@@ -1,0 +1,122 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>Minimal Changes</name>
+      <description>
+        Apply the smallest possible change to fix the failure.
+        Preserve the original test intent and structure.
+      </description>
+      <rationale>
+        Large changes introduce new bugs and make it hard to understand what was fixed.
+      </rationale>
+    </principle>
+
+    <principle priority="high">
+      <name>Root Cause Analysis</name>
+      <description>
+        Always diagnose the root cause before applying a fix.
+        Use trace viewer to understand the failure context.
+      </description>
+      <rationale>
+        Fixing symptoms without understanding cause leads to recurring failures.
+      </rationale>
+    </principle>
+
+    <principle priority="high">
+      <name>Circuit Breaker</name>
+      <description>
+        Stop healing loop after 3 failed attempts.
+        Flag the test for human review if auto-fix fails.
+      </description>
+      <rationale>
+        Endless healing loops waste resources and may introduce regressions.
+      </rationale>
+    </principle>
+  </general_principles>
+
+  <fix_strategies>
+    <strategy name="locator_healing">
+      <description>Update locators when UI changes</description>
+      <steps>
+        <step>Identify the element that cannot be found</step>
+        <step>Inspect current page structure</step>
+        <step>Find equivalent element with stable attributes</step>
+        <step>Update locator to use semantic selector</step>
+        <step>Verify test passes with new locator</step>
+      </steps>
+      <priority>1</priority>
+    </strategy>
+
+    <strategy name="timing_fix">
+      <description>Fix timing-related failures</description>
+      <steps>
+        <step>Identify the element with timing issue</step>
+        <step>Replace hardcoded waits with auto-waiting assertions</step>
+        <step>Use to_be_visible() or similar assertions</step>
+        <step>Verify test passes consistently</step>
+      </steps>
+      <priority>2</priority>
+    </strategy>
+
+    <strategy name="data_fix">
+      <description>Fix test data issues</description>
+      <steps>
+        <step>Identify the data causing failure</step>
+        <step>Check if data exists in test environment</step>
+        <step>Update fixture or use different test data</step>
+        <step>Verify test passes with new data</step>
+      </steps>
+      <priority>3</priority>
+    </strategy>
+  </fix_strategies>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>Over-fixing the test</description>
+      <why_problematic>
+        Large changes introduce new bugs and make diff hard to review.
+      </why_problematic>
+      <correct_approach>
+        Apply minimal change that fixes the specific failure.
+      </correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Masking real failures</description>
+      <why_problematic>
+        Fix may hide actual bugs in the application being tested.
+      </why_problematic>
+      <correct_approach>
+        Verify failure is due to test issue, not application bug.
+      </correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Ignoring root cause</description>
+      <why_problematic>
+        Same failure may recur if root cause not addressed.
+      </why_problematic>
+      <correct_approach>
+        Use trace viewer to understand why failure occurred.
+      </correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="before_fixing">
+      <item>Understand the error message</item>
+      <item>Review trace viewer screenshots</item>
+      <item>Identify root cause of failure</item>
+    </category>
+    <category name="during_fix">
+      <item>Apply minimal change</item>
+      <item>Preserve test intent</item>
+      <item>Follow project conventions</item>
+    </category>
+    <category name="after_fix">
+      <item>Verify test passes</item>
+      <item>Check for side effects</item>
+      <item>Update documentation if needed</item>
+    </category>
+  </quality_checklist>
+</best_practices>

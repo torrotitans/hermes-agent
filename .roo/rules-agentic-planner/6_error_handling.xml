@@ -1,0 +1,145 @@
+<error_handling>
+  <error_categories>
+    <category name="planning_errors">
+      <error name="ambiguous_requirements">
+        <description>User requirements are unclear or incomplete</description>
+        <detection>
+          - User provides vague descriptions without specific file paths
+          - Multiple valid interpretations of the requested feature
+          - Missing constraints or boundary conditions
+        </detection>
+        <resolution>
+          - Ask focused clarifying questions with 2-4 actionable options
+          - Document assumptions explicitly in plan.md
+          - Do not proceed until critical ambiguities are resolved
+        </resolution>
+        <example>
+          <question>Which specific login endpoint needs JWT integration?</question>
+          <options>
+            1) src/api/login/interface_login.py
+            2) src/api/login/interface_offline.py
+            3) Both endpoints
+            4) I need help identifying the right file
+          </options>
+        </example>
+      </error>
+
+      <error name="scope_violation">
+        <description>Proposed plan exceeds allowed boundaries</description>
+        <detection>
+          - Sub-task touches more than 5 files
+          - Sub-task estimated time exceeds 10 minutes
+          - Plan includes implementation code
+        </detection>
+        <resolution>
+          - Split large sub-tasks into smaller atomic units
+          - Remove any implementation code references
+          - Re-verify against 10-Minute Rule
+        </resolution>
+      </error>
+
+      <error name="cyclic_dependency">
+        <description>DAG contains circular dependencies</description>
+        <detection>
+          - Task A depends on Task B, Task B depends on Task A
+          - Dependency chain does not terminate
+        </detection>
+        <resolution>
+          - Reorder tasks to ensure all dependencies reference earlier tasks
+          - Validate DAG is acyclic before presenting to user
+        </resolution>
+      </error>
+    </category>
+
+    <category name="environment_errors">
+      <error name="file_not_found">
+        <description>Referenced file does not exist in repository</description>
+        <detection>
+          - File path in Input Contract returns not found
+          - Directory structure does not match expectations
+        </detection>
+        <resolution>
+          - Re-scan repository structure to find actual paths
+          - Update plan.md with corrected file references
+          - Do not guess; verify via directory listing
+        </resolution>
+      </error>
+
+      <error name="permission_denied">
+        <description>Mode lacks required read permissions</description>
+        <detection>
+          - Read operations fail with permission errors
+          - File access blocked by mode configuration
+        </detection>
+        <resolution>
+          - Request user to adjust mode permissions if necessary
+          - Document permission requirements in plan.md constraints
+        </resolution>
+      </error>
+    </category>
+
+    <category name="execution_handoff_errors">
+      <error name="plan_not_approved">
+        <description>User has not approved plan before execution</description>
+        <detection>
+          - User attempts to proceed without explicit approval
+          - No sign-off detected in conversation
+        </detection>
+        <resolution>
+          - Re-prompt for approval: "Plan generated at [path]. Please review and approve before implementation begins."
+          - Do not proceed to execution without explicit confirmation
+        </resolution>
+      </error>
+
+      <error name="context_firewall_violation">
+        <description>Sub-task context exceeds defined firewall</description>
+        <detection>
+          - Downstream agent references files outside context firewall
+          - Task reads more context than specified in Input Contract
+        </detection>
+        <resolution>
+          - Update context firewall definitions in plan.md
+          - Ensure Input Contracts are precise and complete
+        </resolution>
+      </error>
+    </category>
+  </error_categories>
+
+  <escalation_procedures>
+    <procedure name="unresolvable_ambiguity">
+      <trigger>Cannot resolve critical ambiguity after 3 clarification attempts</trigger>
+      <action>
+        - Document all assumptions made
+        - Present options to user with recommendation
+        - If no response, proceed with most conservative assumption and document it
+      </action>
+    </procedure>
+
+    <procedure name="plan_drift">
+      <trigger>Requirements change significantly during planning</trigger>
+      <action>
+        - Update Update Date in YAML frontmatter
+        - Add Change Log section documenting what changed
+        - Adjust remaining tasks accordingly
+        - Re-request approval for modified plan
+      </action>
+    </procedure>
+
+    <procedure name="token_limit_approaching">
+      <trigger>Context window approaching exhaustion during planning</trigger>
+      <action>
+        - Archive completed planning artifacts to agentic/plan/archive/
+        - Use rolling summaries instead of full conversation history
+        - Reduce context firewall scope to minimum required files
+      </action>
+    </procedure>
+  </escalation_procedures>
+
+  <self_correction>
+    <step>Identify the error category and specific error type</step>
+    <step>Apply the corresponding resolution procedure</step>
+    <step>Update plan.md to reflect corrections</step>
+    <step>Re-validate against quality checklist</step>
+    <step>If failing after 2 correction attempts, escalate to user with documented options</step>
+  </self_correction>
+</error_handling>

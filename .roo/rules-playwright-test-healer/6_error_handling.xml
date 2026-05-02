@@ -1,0 +1,101 @@
+<error_handling>
+  <common_errors>
+    <error name="element_not_found">
+      <description>Locator cannot find element</description>
+      <causes>
+        <cause>UI structure changed</cause>
+        <cause>CSS class names changed</cause>
+        <cause>Element moved to different location</cause>
+      </causes>
+      <solutions>
+        <solution>Update locator to use semantic selector</solution>
+        <solution>Use role-based or text-based locator</solution>
+        <solution>Check if element is in different frame</solution>
+      </solutions>
+    </error>
+
+    <error name="element_not_visible">
+      <description>Element exists but not visible</description>
+      <causes>
+        <cause>Element not yet rendered</cause>
+        <cause>Element hidden by CSS</cause>
+        <cause>Element outside viewport</cause>
+      </causes>
+      <solutions>
+        <solution>Use auto-waiting assertion</solution>
+        <solution>Scroll element into view</solution>
+        <solution>Wait for animation to complete</solution>
+      </solutions>
+    </error>
+
+    <error name="element_not_enabled">
+      <description>Element visible but not enabled</description>
+      <causes>
+        <cause>Form not ready for input</cause>
+        <cause>Validation not complete</cause>
+        <cause>Prerequisites not met</cause>
+      </causes>
+      <solutions>
+        <solution>Wait for element to be enabled</solution>
+        <solution>Check and complete prerequisites</solution>
+        <solution>Verify form state before interaction</solution>
+      </solutions>
+    </error>
+
+    <error name="timeout_exceeded">
+      <description>Operation exceeded timeout limit</description>
+      <causes>
+        <cause>Slow network or server</cause>
+        <cause>Infinite loading state</cause>
+        <cause>Navigation blocked</cause>
+      </causes>
+      <solutions>
+        <solution>Increase timeout for known slow operations</solution>
+        <solution>Check for loading indicators</solution>
+        <solution>Verify navigation target is accessible</solution>
+      </solutions>
+    </error>
+  </common_errors>
+
+  <debugging_strategies>
+    <strategy name="trace_viewer">
+      <description>Use Playwright Trace Viewer for debugging</description>
+      <steps>
+        <step>Run test with --trace on flag</step>
+        <step>Open trace with playwright show-trace</step>
+        <step>Review timeline and screenshots</step>
+        <step>Check network requests and console logs</step>
+        <step>Identify exact point of failure</step>
+      </steps>
+    </strategy>
+
+    <strategy name="screenshot_analysis">
+      <description>Analyze screenshot at failure point</description>
+      <steps>
+        <step>Capture screenshot on failure</step>
+        <step>Compare with expected state</step>
+        <step>Identify visual differences</step>
+        <step>Determine if UI changed or data issue</step>
+      </steps>
+    </strategy>
+
+    <strategy name="console_logging">
+      <description>Check browser console for errors</description>
+      <steps>
+        <step>Listen to console events</step>
+        <step>Review error messages</step>
+        <step>Correlate with test failure</step>
+      </steps>
+    </strategy>
+  </debugging_strategies>
+
+  <circuit_breaker>
+    <description>Stop healing loop after max retries</description>
+    <threshold>3 failed attempts</threshold>
+    <actions>
+      <action>Flag test for human review</action>
+      <action>Document attempted fixes</action>
+      <action>Skip test temporarily if blocking progress</action>
+    </actions>
+  </circuit_breaker>
+</error_handling>

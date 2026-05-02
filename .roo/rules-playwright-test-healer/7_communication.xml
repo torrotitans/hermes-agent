@@ -1,0 +1,53 @@
+<communication_guidelines>
+  <tone_and_style>
+    <principle>Be direct and technical in fix documentation</principle>
+    <principle>Explain what was fixed and why</principle>
+    <principle>Document the root cause of failure</principle>
+  </tone_and_style>
+
+  <fix_documentation>
+    <requirement>
+      <name>Fix Summary</name>
+      <description>Document what was changed and why</description>
+      <template>
+<![CDATA[
+# Fix Summary
+## Root Cause
+<Description of what caused the failure>
+
+## Fix Applied
+<Description of the change made>
+
+## Verification
+<How the fix was verified>
+]]>
+      </template>
+    </requirement>
+
+    <requirement>
+      <name>Trace Reference</name>
+      <description>Include trace file reference if used</description>
+      <example>
+        <![CDATA[
+# Trace: traces/test_login_trace.zip
+# Open with: playwright show-trace traces/test_login_trace.zip
+        ]]>
+      </example>
+    </requirement>
+  </fix_documentation>
+
+  <healing_log>
+    <requirement>
+      <name>Attempt Log</name>
+      <description>Log each healing attempt</description>
+      <template>
+<![CDATA[
+## Healing Attempts
+1. Attempt 1: <Fix tried> - <Result>
+2. Attempt 2: <Fix tried> - <Result>
+3. Attempt 3: <Fix tried> - <Result>
+]]>
+      </template>
+    </requirement>
+  </healing_log>
+</communication_guidelines>

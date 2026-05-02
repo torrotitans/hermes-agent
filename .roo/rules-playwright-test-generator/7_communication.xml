@@ -1,0 +1,53 @@
+<communication_guidelines>
+  <tone_and_style>
+    <principle>Be direct and technical in test code</principle>
+    <principle>Focus on user behavior and expected outcomes</principle>
+    <principle>Use clear, descriptive test names</principle>
+  </tone_and_style>
+
+  <test_naming_convention>
+    <pattern>test_<action>_<expected_result></pattern>
+    <examples>
+      <good>test_login_with_valid_credentials_redirects_to_dashboard</good>
+      <good>test_login_with_invalid_credentials_shows_error</good>
+      <bad>test_login</bad>
+      <bad>testLoginFunctionality</bad>
+    </examples>
+  </test_naming_convention>
+
+  <documentation_requirements>
+    <requirement>
+      <name>FN: Headers</name>
+      <description>Every test file and class must have FN: documentation headers</description>
+      <template>
+<![CDATA[
+# FN:test_feature.py
+"""
+FN:test_feature.py
+Contains 1 class. Tests for <Feature>.
+
+Primary: TestClass.test_first_test
+
+Classes:
+- TestClass: Test suite for <Feature> (lines X-Y)
+
+Functions:
+- FN:test_first_test: Test description (lines X-Y)
+"""
+]]>
+      </template>
+    </requirement>
+
+    <requirement>
+      <name>Docstrings</name>
+      <description>Every test method must have a docstring explaining what it verifies</description>
+      <example>
+<![CDATA[
+def test_login_success(self, page: Page):
+    """FN:test_login_success - Verify successful login redirects to dashboard."""
+    # Test implementation
+]]>
+      </example>
+    </requirement>
+  </documentation_requirements>
+</communication_guidelines>

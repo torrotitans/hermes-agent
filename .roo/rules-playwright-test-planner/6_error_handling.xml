@@ -1,0 +1,130 @@
+<error_handling>
+  <common_errors>
+    <error name="ambiguous_spec">
+      <description>Specification is unclear or ambiguous</description>
+      <causes>
+        <cause>Vague step descriptions</cause>
+        <cause>Missing expected results</cause>
+        <cause>Technical implementation details in spec</cause>
+      </causes>
+      <solutions>
+        <solution>Use clear, action-oriented language</solution>
+        <solution>Be specific about expected outcomes</solution>
+        <solution>Remove technical details from specs</solution>
+      </solutions>
+      <example>
+        <![CDATA[
+# BAD - Ambiguous
+Steps:
+1. Do the login thing
+2. Check it works
+
+# GOOD - Clear
+Steps:
+1. Enter "admin" in username field
+2. Enter "password123" in password field
+3. Click Sign In button
+
+Expected Results:
+- User is redirected to /dashboard
+- Welcome message displays "Welcome, admin"
+        ]]>
+      </example>
+    </error>
+
+    <error name="missing_coverage">
+      <description>Test scenarios don't cover all acceptance criteria</description>
+      <causes>
+        <cause>Incomplete understanding of user story</cause>
+        <cause>Focusing only on happy path</cause>
+        <cause>Missing edge cases</cause>
+      </causes>
+      <solutions>
+        <solution>Map each acceptance criterion to test scenarios</solution>
+        <solution>Include positive, negative, and edge cases</solution>
+        <solution>Use checklist to verify coverage</solution>
+      </solutions>
+    </error>
+
+    <error name="inconsistent_format">
+      <description>Spec doesn't follow standard structure</description>
+      <causes>
+        <cause>Not following template</cause>
+        <cause>Inconsistent scenario naming</cause>
+        <cause>Missing required sections</cause>
+      </causes>
+      <solutions>
+        <solution>Use spec structure template</solution>
+        <solution>Include all required sections</solution>
+        <solution>Follow naming conventions</solution>
+      </solutions>
+    </error>
+  </common_errors>
+
+  <debugging_strategies>
+    <strategy name="coverage_check">
+      <description>Verify test coverage completeness</description>
+      <steps>
+        <step>List all acceptance criteria from user story</step>
+        <step>Map each criterion to test scenarios</step>
+        <step>Identify gaps in coverage</step>
+        <step>Add missing scenarios</step>
+      </steps>
+    </strategy>
+
+    <strategy name="clarity_review">
+      <description>Review spec for clarity</description>
+      <steps>
+        <step>Read spec as if you're a tester receiving it</step>
+        <step>Check if steps are actionable</step>
+        <step>Verify expected results are specific</step>
+        <step>Remove technical jargon</step>
+      </steps>
+    </strategy>
+  </debugging_strategies>
+
+  <recovery_patterns>
+    <pattern name="add_missing_scenario">
+      <description>Add scenario to cover missing criteria</description>
+      <example>
+        <![CDATA[
+### 3. <New Scenario Group>
+
+**Seed:** `tests/seed.spec.ts`
+
+#### 3.1 <Scenario Name>
+
+**Steps:**
+1. <Step 1>
+2. <Step 2>
+
+**Expected Results:**
+- <Result 1>
+        ]]>
+      </example>
+    </pattern>
+
+    <pattern name="clarify_scenario">
+      <description>Make ambiguous scenario clearer</description>
+      <example>
+        <![CDATA[
+# Before
+Steps:
+1. Test the form
+
+# After
+Steps:
+1. Navigate to /settings page
+2. Enter "John Doe" in name field
+3. Enter "john@example.com" in email field
+4. Click Save button
+
+Expected Results:
+- Success message displays "Settings saved"
+- Name field shows "John Doe"
+- Email field shows "john@example.com"
+        ]]>
+      </example>
+    </pattern>
+  </recovery_patterns>
+</error_handling>

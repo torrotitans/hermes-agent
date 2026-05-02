@@ -1,0 +1,134 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>Human-Readable Specifications</name>
+      <description>
+        Specs should be readable by humans without technical testing knowledge.
+        Focus on user behavior and outcomes, not implementation details.
+      </description>
+      <rationale>
+        Specs serve as communication between product owners and test engineers.
+      </rationale>
+      <example>
+        <scenario>Describing a login test</scenario>
+        <good>
+          Steps:
+          1. Enter valid username and password
+          2. Click Sign In button
+          
+          Expected Results:
+          - User is redirected to dashboard
+          - Welcome message is displayed
+        </good>
+        <bad>
+          Steps:
+          1. page.get_by_label("Username").fill("admin")
+          2. page.get_by_label("Password").fill("password")
+          3. page.get_by_role("button", name="Sign In").click()
+        </bad>
+      </example>
+    </principle>
+
+    <principle priority="high">
+      <name>Comprehensive Coverage</name>
+      <description>
+        Cover all acceptance criteria including positive, negative, and edge cases.
+      </description>
+      <rationale>
+        Complete test coverage prevents regressions and ensures quality.
+      </rationale>
+    </principle>
+
+    <principle priority="medium">
+      <name>Seed Test Reference</name>
+      <description>
+        Reference the seed test in specs to provide patterns for the generator.
+      </description>
+      <rationale>
+        Seed tests demonstrate test structure, fixtures, and patterns.
+      </rationale>
+    </principle>
+  </general_principles>
+
+  <spec_conventions>
+    <convention category="naming">
+      <rule>Spec files: specs/<feature>.md</rule>
+      <rule>Use lowercase with hyphens for word separation</rule>
+      <examples>
+        <good>specs/user-login.md</good>
+        <good>specs/dashboard-navigation.md</good>
+        <bad>specs/UserLogin.md</bad>
+        <bad>specs/user_login.md</bad>
+      </examples>
+    </convention>
+
+    <convention category="structure">
+      <rule>Follow the spec structure template</rule>
+      <rule>Include all required sections</rule>
+      <rule>Use consistent formatting</rule>
+    </convention>
+
+    <convention category="scenarios">
+      <rule>Number scenarios sequentially</rule>
+      <rule>Use descriptive scenario names</rule>
+      <rule>Include both happy path and error cases</rule>
+      <examples>
+        <good>1.1 Add Valid Todo</good>
+        <good>1.2 Add Todo With Special Characters</good>
+        <good>1.3 Add Empty Todo</good>
+        <bad>Test 1</bad>
+        <bad>Login Test</bad>
+      </examples>
+    </convention>
+  </spec_conventions>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>Missing negative test cases</description>
+      <why_problematic>
+        Tests only verify happy path, missing error handling validation.
+      </why_problematic>
+      <correct_approach>
+        Always include error scenarios: invalid input, network failures, permissions.
+      </correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Overly technical specifications</description>
+      <why_problematic>
+        Specs become implementation details, not user behavior descriptions.
+      </why_problematic>
+      <correct_approach>
+        Describe what the user does and sees, not how to automate it.
+      </correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Ambiguous expected results</description>
+      <why_problematic>
+        Tests may pass but not verify correct behavior.
+      </why_problematic>
+      <correct_approach>
+        Be specific about what should be visible, what data should change.
+      </correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="before_starting">
+      <item>Understand user story and acceptance criteria</item>
+      <item>Review existing specs for patterns</item>
+      <item>Identify all test scenarios needed</item>
+    </category>
+    <category name="during_creation">
+      <item>Follow spec structure template</item>
+      <item>Include positive, negative, and edge cases</item>
+      <item>Reference seed test for patterns</item>
+    </category>
+    <category name="before_completion">
+      <item>Verify all acceptance criteria covered</item>
+      <item>Check scenarios are clear and actionable</item>
+      <item>Confirm test data requirements documented</item>
+    </category>
+  </quality_checklist>
+</best_practices>

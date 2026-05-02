@@ -1,0 +1,123 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>Minimal Change Principle</name>
+      <description>Each experiment should make the smallest possible change that tests a specific hypothesis</description>
+      <rationale>Isolating variables allows clear attribution of results to specific changes</rationale>
+      <example>
+        <scenario>Improving learning rate schedule</scenario>
+        <good>Change only the initial learning rate value</good>
+        <bad>Change learning rate, batch size, and model width simultaneously</bad>
+      </example>
+    </principle>
+
+    <principle priority="high">
+      <name>Single Metric Optimization</name>
+      <description>Focus on val_bpb as the primary optimization target</description>
+      <rationale>Consistent metric enables fair comparison across experiments</rationale>
+      <example>
+        <scenario>Evaluating experiment success</scenario>
+        <good>Compare val_bpb: 0.9979 vs 0.9932 (improvement)</good>
+        <bad>Compare val_bpb and training speed together</bad>
+      </example>
+    </principle>
+
+    <principle priority="high">
+      <name>Systematic Exploration</name>
+      <description>Explore research space methodically, not randomly</description>
+      <rationale>Systematic approach maximizes discoveries per experiment budget</rationale>
+      <example>
+        <scenario>Planning experiment sequence</scenario>
+        <good>Start with learning rate, then batch size, then architecture</good>
+        <bad>Jump between unrelated changes without pattern</bad>
+      </example>
+    </principle>
+
+    <principle priority="medium">
+      <name>Document Every Change</name>
+      <description>Every commit message must clearly describe the experimental change</description>
+      <rationale>Enables追溯 of what worked and what didn't</rationale>
+      <example>
+        <scenario>Committing experiment</scenario>
+        <good>git commit -m "increase LR from 0.03 to 0.04"</good>
+        <bad>git commit -m "update training"</bad>
+      </example>
+    </principle>
+
+    <principle priority="medium">
+      <name>Hardware-Aware Design</name>
+      <description>Design experiments within GPU memory constraints</description>
+      <rationale>Prevents OOM crashes that waste experiment time</rationale>
+      <example>
+        <scenario>Increasing model capacity</scenario>
+        <good>Increase depth from 8 to 10, keep width same</good>
+        <bad>Double both depth and width (likely OOM)</bad>
+      </example>
+    </principle>
+  </general_principles>
+
+  <code_conventions>
+    <convention category="commit_messages">
+      <rule>Use descriptive, specific commit messages that explain the experimental change</rule>
+      <examples>
+        <good>increase LR to 0.04, reduce warmup ratio</good>
+        <bad>update train.py</bad>
+      </examples>
+    </convention>
+
+    <convention category="experiment_tracking">
+      <rule>Always log results to results.tsv immediately after each run</rule>
+      <template>
+commit	val_bpb	memory_gb	status	description
+a1b2c3d	0.993200	44.2	keep	increase LR to 0.04
+      </template>
+    </convention>
+  </code_conventions>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>Changing multiple variables in a single experiment</description>
+      <why_problematic>Makes it impossible to attribute results to specific changes</why_problematic>
+      <correct_approach>Change one variable at a time; if multiple changes are needed, test each separately first</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Running experiments without timeout protection</description>
+      <why_problematic>A hung training run wastes the entire 5-minute budget</why_problematic>
+      <correct_approach>Always use timeout (10 minutes max) and check for crashes</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Forgetting to reset on failed experiments</description>
+      <why_problematic>Corrupts git history and makes results.tsv inconsistent</why_problematic>
+      <correct_approach>Always git reset --hard HEAD~1 after discard or crash</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Ignoring memory constraints</description>
+      <why_problematic>Causes OOM crashes that provide no useful data</why_problematic>
+      <correct_approach>Check peak_vram_mb before proposing memory-intensive changes</correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="before_starting">
+      <item>Verify baseline training works and record metrics</item>
+      <item>Ensure results.tsv header exists</item>
+      <item>Confirm GPU availability and memory</item>
+      <item>Create dedicated research branch</item>
+    </category>
+    <category name="during_implementation">
+      <item>Make minimal, focused changes</item>
+      <item>Document changes in commit messages</item>
+      <item>Log results immediately after each run</item>
+      <item>Track which experiments improved vs regressed</item>
+    </category>
+    <category name="before_completion">
+      <item>Review all experiments in results.tsv</item>
+      <item>Identify best configuration</item>
+      <item>Document key findings and patterns</item>
+      <item>Ensure git history is clean</item>
+    </category>
+  </quality_checklist>
+</best_practices>

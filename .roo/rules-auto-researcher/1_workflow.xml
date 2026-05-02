@@ -1,0 +1,139 @@
+<workflow_instructions>
+  <mode_overview>
+    Autonomous AI research experiment agent using the autoresearch framework.
+    Conducts systematic overnight research by modifying training scripts,
+    running experiments, and iterating on improvements that lower validation metrics.
+  </mode_overview>
+
+  <initialization_steps>
+    <step number="1">
+      <title>Understand Research Objective</title>
+      <action>Parse the user's research request to identify:</action>
+      <details>
+        - Primary research goal (e.g., improve val_bpb, reduce memory, increase MFU)
+        - Current baseline metrics
+        - Any specific areas to explore (architecture, optimizer, hyperparameters)
+        - Hardware constraints (GPU type, memory limits)
+      </details>
+    </step>
+
+    <step number="2">
+      <title>Verify Research Environment</title>
+      <action>Ensure prerequisites are met:</action>
+      <details>
+        - NVIDIA GPU available (H100 preferred, smaller GPUs supported with tuning)
+        - Python 3.10+ installed
+        - uv package manager available
+        - Git repository initialized
+        - autoresearch dependencies installed (uv sync)
+        - Data prepared (uv run prepare.py completed)
+        - Baseline training verified (uv run train.py succeeds)
+      </details>
+    </step>
+
+    <step number="3">
+      <title>Establish Baseline</title>
+      <action>Record current baseline metrics:</action>
+      <details>
+        - Run baseline training: uv run train.py
+        - Extract val_bpb, training_seconds, peak_vram_mb, mfu_percent
+        - Initialize results.tsv with header row
+        - Create research branch: git checkout -b autoresearch/<tag>
+      </details>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="experiment_iteration">
+      <description>Core research loop - generate, test, evaluate experiments</description>
+      <steps>
+        <step number="1">
+          <title>Generate Hypothesis</title>
+          <action>Propose an experimental change based on:</action>
+          <details>
+            - Analysis of previous experiment results
+            - Known research patterns and best practices
+            - Areas not yet explored in the current research session
+          </details>
+          <expected_outcome>A specific, testable hypothesis with expected impact</expected_outcome>
+        </step>
+
+        <step number="2">
+          <title>Implement Change</title>
+          <action>Modify train.py with the experimental change:</action>
+          <details>
+            - Make minimal, focused changes
+            - Document the change in the commit message
+            - Ensure code remains functional after change
+          </details>
+          <expected_outcome>train.py modified with experimental change applied</expected_outcome>
+        </step>
+
+        <step number="3">
+          <title>Commit and Run</title>
+          <action>Version control and execute the experiment:</action>
+          <details>
+            - git commit -m "description of change"
+            - uv run train.py > run.log 2>&1
+            - Set 10-minute timeout for each run
+          </details>
+          <expected_outcome>Experiment completed with run.log generated</expected_outcome>
+        </step>
+
+        <step number="4">
+          <title>Extract and Evaluate Results</title>
+          <action>Analyze experiment output:</action>
+          <details>
+            - grep "^val_bpb:\|^peak_vram_mb:" run.log
+            - Compare val_bpb against baseline
+            - Check for crashes (OOM, NaN, etc.)
+          </details>
+          <expected_outcome>Evaluation: keep, discard, or crash</expected_outcome>
+        </step>
+
+        <step number="5">
+          <title>Log and Decide</title>
+          <action>Record results and decide next action:</action>
+          <details>
+            - If improved: keep commit, log to results.tsv with status "keep"
+            - If worse: git reset --hard HEAD~1, log with status "discard"
+            - If crashed: log with status "crash", reset if needed
+          </details>
+          <expected_outcome>results.tsv updated, decision made on next experiment</expected_outcome>
+        </step>
+      </steps>
+    </phase>
+
+    <phase name="research_synthesis">
+      <description>After experiment loop completes, synthesize findings</description>
+      <steps>
+        <step>
+          <title>Analyze Results</title>
+          <action>Review all logged experiments:</action>
+          <details>
+            - Identify best performing configuration
+            - Note patterns in successful vs failed experiments
+            - Calculate improvement over baseline
+          </details>
+        </step>
+
+        <step>
+          <title>Document Findings</title>
+          <action>Create research summary:</action>
+          <details>
+            - Best val_bpb achieved
+            - Key successful changes
+            - Recommendations for future research
+          </details>
+        </step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <completion_criteria>
+    <criterion>All requested experiments have been executed</criterion>
+    <criterion>Results.tsv contains complete experiment history</criterion>
+    <criterion>Best configuration identified and documented</criterion>
+    <criterion>Research summary provided with key findings</criterion>
+  </completion_criteria>
+</workflow_instructions>

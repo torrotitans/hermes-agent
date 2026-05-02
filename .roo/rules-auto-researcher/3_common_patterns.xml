@@ -1,0 +1,129 @@
+<common_patterns>
+  <overview>
+    Reusable experiment patterns and code modifications for common research directions.
+    These patterns serve as starting points for hypothesis generation.
+  </overview>
+
+  <patterns category="optimizer_changes">
+    <pattern name="learning_rate_tuning">
+      <description>Adjust learning rate and scheduling for better convergence</description>
+      <variations>
+        <variation>
+          <name>increase_base_lr</name>
+          <change>Increase initial learning rate (e.g., 0.03 -> 0.04)</change>
+          <expected_impact>Faster convergence, risk of divergence</expected_impact>
+        </variation>
+        <variation>
+          <name>reduce_warmup</name>
+          <change>Reduce warmup ratio (e.g., 0.1 -> 0.01)</change>
+          <expected_impact>Faster ramp to full LR, may cause early instability</expected_impact>
+        </variation>
+        <variation>
+          <name>cosine_schedule</name>
+          <change>Switch to cosine annealing with warmup</change>
+          <expected_impact>Smoother convergence near end of training</expected_impact>
+        </variation>
+      </variations>
+    </pattern>
+
+    <pattern name="weight_decay_adjustment">
+      <description>Modify regularization strength</description>
+      <variations>
+        <variation>
+          <name>increase_decay</name>
+          <change>Increase weight decay (e.g., 0.1 -> 0.3)</change>
+          <expected_impact>Stronger regularization, may prevent overfitting</expected_impact>
+        </variation>
+      </variations>
+    </pattern>
+  </patterns>
+
+  <patterns category="architecture_changes">
+    <pattern name="depth_modification">
+      <description>Change number of transformer layers</description>
+      <variations>
+        <variation>
+          <name>increase_depth</name>
+          <change>Increase n_layer (e.g., 8 -> 10)</change>
+          <expected_impact>More capacity, higher memory usage</expected_impact>
+        </variation>
+        <variation>
+          <name>decrease_depth</name>
+          <change>Decrease n_layer (e.g., 8 -> 6)</change>
+          <expected_impact>Lower memory, faster training</expected_impact>
+        </variation>
+      </variations>
+    </pattern>
+
+    <pattern name="attention_modification">
+      <description>Change attention mechanism configuration</description>
+      <variations>
+        <variation>
+          <name>increase_heads</name>
+          <change>Increase n_head (e.g., 8 -> 12)</change>
+          <expected_impact>Better multi-view attention, more compute</expected_impact>
+        </variation>
+        <variation>
+          <name>rope_embeddings</name>
+          <change>Switch to RoPE positional embeddings</change>
+          <expected_impact>Better positional encoding, may improve generalization</expected_impact>
+        </variation>
+      </variations>
+    </pattern>
+
+    <pattern name="activation_change">
+      <description>Modify activation functions</description>
+      <variations>
+        <variation>
+          <name>swiglu</name>
+          <change>Switch to SwiGLU activation</change>
+          <expected_impact>Better expressivity, slightly more compute</expected_impact>
+        </variation>
+      </variations>
+    </pattern>
+  </patterns>
+
+  <patterns category="training_loop_changes">
+    <pattern name="gradient_accumulation">
+      <description>Modify effective batch size via accumulation</description>
+      <variations>
+        <variation>
+          <name>increase_accumulation</name>
+          <change>Increase gradient accumulation steps</change>
+          <expected_impact>Larger effective batch, more stable gradients</expected_impact>
+        </variation>
+      </variations>
+    </pattern>
+
+    <pattern name="mixed_precision">
+      <description>Enable/disable mixed precision training</description>
+      <variations>
+        <variation>
+          <name>enable_bf16</name>
+          <change>Enable bf16 mixed precision</change>
+          <expected_impact>Lower memory usage, faster training on modern GPUs</expected_impact>
+        </variation>
+      </variations>
+    </pattern>
+  </patterns>
+
+  <patterns category="data_changes">
+    <pattern name="sequence_length">
+      <description>Modify maximum sequence length</description>
+      <variations>
+        <variation>
+          <name>increase_seq_len</name>
+          <change>Increase block_size (e.g., 256 -> 512)</change>
+          <expected_impact>Longer context, quadratically more compute</expected_impact>
+        </variation>
+      </variations>
+    </pattern>
+  </patterns>
+
+  <usage_guidelines>
+    <guideline>Select patterns based on current baseline performance</guideline>
+    <guideline>Start with optimizer changes before architecture changes</guideline>
+    <guideline>Track which pattern categories yield improvements</guideline>
+    <guideline>Combine patterns only after individual validation</guideline>
+  </usage_guidelines>
+</common_patterns>

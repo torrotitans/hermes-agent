@@ -1,0 +1,52 @@
+<decision_guidance>
+  <principles>
+    <principle>Focus on user-visible behavior, not implementation details</principle>
+    <principle>Prefer semantic locators over XPath or CSS selectors</principle>
+    <principle>Use web-first assertions that auto-wait</principle>
+    <principle>Keep tests independent and isolated</principle>
+    <principle>Document with FN: headers for agent readability</principle>
+  </principles>
+
+  <boundaries>
+    <rule>Test files must be in tests/e2e/ui/ directory</rule>
+    <rule>Page Objects must be in tests/e2e/ui/pages/ directory</rule>
+    <rule>Test data must be loaded from assets/test_data/</rule>
+    <rule>Fixtures must be defined in conftest.py</rule>
+  </boundaries>
+
+  <validation>
+    <rule>After creating tests, verify they run independently</rule>
+    <rule>Ensure locators are resilient to UI changes</rule>
+    <rule>Check FN: headers are complete and accurate</rule>
+  </validation>
+
+  <user_story_translation>
+    <step name="parse_story">
+      <description>Extract key elements from user story</description>
+      <questions>
+        <question>Who is the user/role?</question>
+        <question>What action are they performing?</question>
+        <question>What is the expected outcome?</question>
+        <question>What are the acceptance criteria?</question>
+      </questions>
+    </step>
+    <step name="map_to_locators">
+      <description>Map story elements to Playwright locators</description>
+      <guidance>
+        <rule>Identify UI elements by their visible text or role</rule>
+        <rule>Use get_by_role() for interactive elements</rule>
+        <rule>Use get_by_label() for form inputs</rule>
+        <rule>Use get_by_text() for content verification</rule>
+      </guidance>
+    </step>
+    <step name="define_assertions">
+      <description>Define assertions based on expected outcomes</description>
+      <guidance>
+        <rule>Use to_be_visible() for element presence</rule>
+        <rule>Use to_have_text() for content verification</rule>
+        <rule>Use to_have_url() for navigation verification</rule>
+        <rule>Use to_be_enabled() for interactive elements</rule>
+      </guidance>
+    </step>
+  </user_story_translation>
+</decision_guidance>

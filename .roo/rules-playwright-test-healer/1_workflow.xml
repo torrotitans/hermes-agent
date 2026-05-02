@@ -1,0 +1,131 @@
+<workflow_instructions>
+  <mode_overview>
+    Playwright Test Healer mode automatically repairs failing tests by analyzing
+    traces, replaying steps, inspecting UI, and suggesting fixes.
+  </mode_overview>
+
+  <initialization_steps>
+    <step number="1">
+      <action>Identify the failing test</action>
+      <details>
+        Gather information about the failure:
+        - Test file path and name
+        - Error message and stack trace
+        - Test output and logs
+      </details>
+    </step>
+
+    <step number="2">
+      <action>Review existing test structure</action>
+      <details>
+        Check existing structure:
+        - Test file being repaired
+        - Page Objects used by the test
+        - Fixtures and dependencies
+      </details>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="diagnosis">
+      <description>Diagnose the root cause of failure</description>
+      <steps>
+        <step>Read error message and stack trace</step>
+        <step>Identify which assertion or action failed</step>
+        <step>Determine if failure is due to timing, locator, or data issue</step>
+        <step>Check if UI has changed (new elements, different structure)</step>
+      </steps>
+    </phase>
+
+    <phase name="trace_analysis">
+      <description>Analyze trace to understand failure context</description>
+      <steps>
+        <step>Run test with --trace on flag</step>
+        <step>Open trace with playwright show-trace</step>
+        <step>Review screenshots at each step</step>
+        <step>Check network requests and responses</step>
+        <step>Identify when and where failure occurred</step>
+      </steps>
+    </phase>
+
+    <phase name="fix_implementation">
+      <description>Implement the minimal fix to resolve failure</description>
+      <steps>
+        <step>Identify the specific code that needs change</step>
+        <step>Apply minimal fix (locator update, wait adjustment, data fix)</step>
+        <step>Add FN: documentation if structure changed</step>
+        <step>Preserve test intent while fixing implementation</step>
+      </steps>
+    </phase>
+
+    <phase name="verification">
+      <description>Re-run test to verify fix</description>
+      <steps>
+        <step>Run the specific test that was fixed</step>
+        <step>Verify test passes consistently</step>
+        <step>Check for any side effects on related tests</step>
+        <step>Document the fix if it reveals a pattern</step>
+      </steps>
+    </phase>
+
+    <phase name="guardrail_check">
+      <description>Ensure fix doesn't introduce new issues</description>
+      <steps>
+        <step>Verify fix doesn't mask real failures</step>
+        <step>Check fix is resilient to future UI changes</step>
+        <step>Ensure fix follows project conventions</step>
+        <step>Stop healing loop if max retries exceeded</step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <fix_patterns>
+    <pattern name="locator_update">
+      <description>Update locator when UI changes</description>
+      <template>
+<![CDATA[
+# Before - Brittle CSS selector
+self.submit_button = page.locator(".btn-submit")
+
+# After - Semantic role-based locator
+self.submit_button = page.get_by_role("button", name="Submit")
+]]>
+      </template>
+    </pattern>
+
+    <pattern name="wait_adjustment">
+      <description>Adjust wait strategy for timing issues</description>
+      <template>
+<![CDATA[
+# Before - Hardcoded wait
+page.wait_for_timeout(5000)
+
+# After - Auto-waiting assertion
+from playwright.sync_api import expect
+expect(page.get_by_text("Success")).to_be_visible()
+]]>
+      </template>
+    </pattern>
+
+    <pattern name="data_fix">
+      <description>Fix test data issues</description>
+      <template>
+<![CDATA[
+# Before - Hardcoded test data
+page.fill("#username", "admin")
+
+# After - Using fixture data
+page.fill("#username", login_payload["username"])
+]]>
+      </template>
+    </pattern>
+  </fix_patterns>
+
+  <completion_criteria>
+    <criterion>Root cause of failure identified</criterion>
+    <criterion>Minimal fix applied to resolve failure</criterion>
+    <criterion>Test passes after fix</criterion>
+    <criterion>Fix follows project conventions</criterion>
+    <criterion>FN: documentation updated if needed</criterion>
+  </completion_criteria>
+</workflow_instructions>

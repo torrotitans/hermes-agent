@@ -1,0 +1,132 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>Business-First Naming</name>
+      <description>Use business-friendly names for datasets, fields, and metrics. Avoid technical table column names as the primary identifier.</description>
+      <rationale>OSI models serve as the semantic layer between physical data and AI/BI tools. Business names improve discoverability and query generation.</rationale>
+      <example>
+        <scenario>Modeling a customer table</scenario>
+        <good>name: customers, field: full_name</good>
+        <bad>name: dim_customer, field: cust_full_nm</bad>
+      </example>
+    </principle>
+
+    <principle priority="high">
+      <name>Comprehensive ai_context</name>
+      <description>Every entity (model, dataset, field, metric, relationship) should include ai_context with synonyms and instructions.</description>
+      <rationale>AI tools rely on ai_context to understand business meaning and generate accurate queries. Rich synonyms improve LLM query generation.</rationale>
+      <example>
+        <scenario>Adding synonyms to a metric</scenario>
+        <good>ai_context: {synonyms: ["revenue", "total sales", "gross income"]}</good>
+        <bad>No ai_context provided</bad>
+      </example>
+    </principle>
+
+    <principle priority="high">
+      <name>Multi-Dialect Expressions</name>
+      <description>When a model targets multiple platforms, provide dialect-specific expressions for critical fields and metrics.</description>
+      <rationale>Different platforms have different SQL syntax. Multi-dialect support ensures portability across Snowflake, Databricks, and ANSI SQL environments.</rationale>
+      <example>
+        <scenario>String concatenation varies by platform</scenario>
+        <good>dialects: [{dialect: ANSI_SQL, expression: "a || b"}, {dialect: SNOWFLAKE, expression: "CONCAT(a, b)}]</good>
+        <bad>Single expression without dialect specification</bad>
+      </example>
+    </principle>
+
+    <principle priority="medium">
+      <name>Time Dimension Marking</name>
+      <description>Mark all time-related fields with dimension.is_time: true to enable temporal filtering and time-series analysis.</description>
+      <rationale>AI tools use is_time flags to automatically apply time-based operations like date truncation and rolling windows.</rationale>
+    </principle>
+
+    <principle priority="medium">
+      <name>Composite Key Documentation</name>
+      <description>Document both primary_key and unique_keys explicitly. Use composite keys when single columns cannot uniquely identify rows.</description>
+      <rationale>Relationship resolution depends on accurate key information. Missing unique_keys can cause incorrect join paths.</rationale>
+    </principle>
+  </general_principles>
+
+  <code_conventions>
+    <convention category="naming">
+      <rule>Use lowercase with underscores for all OSI entity names</rule>
+      <examples>
+        <good>order_lines, customer_id, total_revenue</good>
+        <bad>OrderLines, CustomerID, TotalRevenue</bad>
+      </examples>
+    </convention>
+
+    <convention category="source_format">
+      <rule>Use database.schema.table format for dataset source references</rule>
+      <examples>
+        <good>source: sales.public.orders</good>
+        <bad>source: orders</bad>
+      </examples>
+    </convention>
+
+    <convention category="expression_format">
+      <rule>Use unqualified column names in field expressions; qualify in metric expressions</rule>
+      <examples>
+        <good>Field expression: order_date (unqualified)</good>
+        <good>Metric expression: SUM(sales.amount) (qualified)</good>
+      </examples>
+    </convention>
+
+    <convention category="yaml_structure">
+      <rule>Place version header and schema reference at file top</rule>
+      <template>
+# yaml-language-server: $schema=../core-spec/osi-schema.json
+version: "0.1.1"
+
+semantic_model:
+  - name: ...
+      </template>
+    </convention>
+  </code_conventions>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>Forgetting to mark time dimensions with is_time: true</description>
+      <why_problematic>AI tools cannot automatically apply time-based operations without this flag</why_problematic>
+      <correct_approach>Review all date/datetime columns and set dimension.is_time: true</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Using raw SQL column names instead of business names</description>
+      <why_problematic>Reduces AI query generation quality and discoverability</why_problematic>
+      <correct_approach>Use business-friendly names; add technical column as expression if different</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Omitting ai_context synonyms</description>
+      <why_problematic>LLMs may not recognize alternative terms users might use in natural language queries</why_problematic>
+      <correct_approach>Add common synonyms, abbreviations, and business terms to ai_context</correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Mismatched relationship columns</description>
+      <why_problematic>Relationships with incorrect column references break join path resolution</why_problematic>
+      <correct_approach>Verify from_columns exist in the from dataset and to_columns match the to dataset's primary/unique keys</correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="before_starting">
+      <item>Understand the business domain and target platforms</item>
+      <item>Identify all source tables and their columns</item>
+      <item>Determine which columns are time dimensions</item>
+      <item>List required metrics and their calculations</item>
+    </category>
+    <category name="during_implementation">
+      <item>Use business-friendly names throughout</item>
+      <item>Add ai_context synonyms for every entity</item>
+      <item>Mark time dimensions explicitly</item>
+      <item>Document composite keys clearly</item>
+    </category>
+    <category name="before_completion">
+      <item>Run OSI validator on the model file</item>
+      <item>Verify all relationship references are valid</item>
+      <item>Check metric expressions reference correct dataset.field paths</item>
+      <item>Review ai_context for completeness</item>
+    </category>
+  </quality_checklist>
+</best_practices>

@@ -1,0 +1,59 @@
+<decision_guidance>
+  <principles>
+    <principle>Diagnose before fixing - understand root cause</principle>
+    <principle>Apply minimal change to fix the failure</principle>
+    <principle>Preserve test intent while fixing implementation</principle>
+    <principle>Use trace viewer to understand failure context</principle>
+    <principle>Stop after 3 failed attempts and flag for review</principle>
+  </principles>
+
+  <boundaries>
+    <rule>Only edit test files and Page Object files</rule>
+    <rule>Do not change test logic or assertions without good reason</rule>
+    <rule>Do not disable tests or skip assertions</rule>
+    <rule>Stop healing loop if max retries exceeded</rule>
+  </boundaries>
+
+  <validation>
+    <rule>After fixing, verify test passes consistently</rule>
+    <rule>Check fix doesn't mask real application bugs</rule>
+    <rule>Ensure fix follows project conventions</rule>
+  </validation>
+
+  <fix_decision_tree>
+    <step name="identify_failure_type">
+      <description>Identify the type of failure</description>
+      <questions>
+        <question>Is this a locator issue?</question>
+        <question>Is this a timing issue?</question>
+        <question>Is this a data issue?</question>
+        <question>Is this an application bug?</question>
+      </questions>
+    </step>
+    <step name="select_fix_strategy">
+      <description>Select appropriate fix strategy</description>
+      <guidance>
+        <rule>Locator issue - Update to semantic selector</rule>
+        <rule>Timing issue - Use auto-waiting assertion</rule>
+        <rule>Data issue - Update fixture or test data</rule>
+        <rule>Application bug - Flag for human review</rule>
+      </guidance>
+    </step>
+    <step name="apply_fix">
+      <description>Apply the minimal fix</description>
+      <guidance>
+        <rule>Change only what's necessary</rule>
+        <rule>Preserve test intent</rule>
+        <rule>Follow project conventions</rule>
+      </guidance>
+    </step>
+    <step name="verify_fix">
+      <description>Verify the fix resolves the issue</description>
+      <guidance>
+        <rule>Run the specific test</rule>
+        <rule>Check test passes consistently</rule>
+        <rule>Verify no side effects</rule>
+      </guidance>
+    </step>
+  </fix_decision_tree>
+</decision_guidance>

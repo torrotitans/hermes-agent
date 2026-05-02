@@ -1,0 +1,60 @@
+<decision_guidance>
+  <principles>
+    <principle>Focus on user behavior, not implementation details</principle>
+    <principle>Cover all acceptance criteria from user story</principle>
+    <principle>Include positive, negative, and edge cases</principle>
+    <principle>Use clear, human-readable language</principle>
+    <principle>Reference seed test for patterns</principle>
+  </principles>
+
+  <boundaries>
+    <rule>Spec files must be in specs/ directory</rule>
+    <rule>Seed tests must be in tests/ directory</rule>
+    <rule>Follow Playwright agent architecture structure</rule>
+  </boundaries>
+
+  <validation>
+    <rule>After creating spec, verify all acceptance criteria covered</rule>
+    <rule>Check scenarios are clear and actionable</rule>
+    <rule>Confirm seed test demonstrates patterns</rule>
+  </validation>
+
+  <user_story_translation>
+    <step name="parse_story">
+      <description>Extract key elements from user story</description>
+      <questions>
+        <question>Who is the user/role?</question>
+        <question>What action are they performing?</question>
+        <question>What is the expected outcome?</question>
+        <question>What are the acceptance criteria?</question>
+      </questions>
+    </step>
+    <step name="identify_scenarios">
+      <description>Identify test scenarios from acceptance criteria</description>
+      <guidance>
+        <rule>Each acceptance criterion should have at least one test scenario</rule>
+        <rule>Include happy path for each criterion</rule>
+        <rule>Include error cases for validation</rule>
+        <rule>Include edge cases for boundary conditions</rule>
+      </guidance>
+    </step>
+    <step name="define_steps">
+      <description>Define clear steps for each scenario</description>
+      <guidance>
+        <rule>Use numbered lists for sequential actions</rule>
+        <rule>Be specific about what the user does</rule>
+        <rule>Avoid technical implementation details</rule>
+        <rule>Include data values where relevant</rule>
+      </guidance>
+    </step>
+    <step name="define_results">
+      <description>Define expected results for each scenario</description>
+      <guidance>
+        <rule>Be specific about visible changes</rule>
+        <rule>Include success and error messages</rule>
+        <rule>Include state changes (redirects, data updates)</rule>
+        <rule>Use bullet points for multiple results</rule>
+      </guidance>
+    </step>
+  </user_story_translation>
+</decision_guidance>

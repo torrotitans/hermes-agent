@@ -1,0 +1,121 @@
+<complete_examples>
+  <overview>
+    Complete workflow examples demonstrating the autoresearch mode in action.
+    Each example shows the full cycle from request to results.
+  </overview>
+
+  <example name="baseline_research_session">
+    <scenario>
+      User wants to run an overnight autonomous research session to improve
+      the val_bpb of a small LLM training setup.
+    </scenario>
+
+    <user_request>
+      Run an overnight research session to improve val_bpb on our current training setup.
+    </user_request>
+
+    <workflow>
+      <step number="1">
+        <description>Verify environment and establish baseline</description>
+        <approach>
+          Check GPU availability, verify dependencies, run baseline training.
+        </approach>
+        <expected_outcome>Baseline val_bpb: 0.9979, training time: 300s, VRAM: 44GB</expected_outcome>
+      </step>
+
+      <step number="2">
+        <description>Initialize research branch and results tracking</description>
+        <approach>
+          Create branch autoresearch/mar24, initialize results.tsv with header.
+        </approach>
+        <analysis>Research environment ready for iteration.</analysis>
+      </step>
+
+      <step number="3">
+        <description>Execute experiment loop</description>
+        <approach>
+          Generate hypothesis, modify train.py, commit, run, evaluate, log.
+          Repeat for requested number of experiments.
+        </approach>
+        <sample_experiments>
+          <experiment>
+            <hypothesis>Increasing learning rate from 0.03 to 0.04 will improve convergence</hypothesis>
+            <change>LR = 0.04 in train.py</change>
+            <result>val_bpb: 0.9932 (improved), status: keep</result>
+          </experiment>
+          <experiment>
+            <hypothesis>GeLU activation will provide better gradients than GELU-approx</hypothesis>
+            <change>Switch to exact GeLU in train.py</change>
+            <result>val_bpb: 1.0050 (worse), status: discard</result>
+          </experiment>
+          <experiment>
+            <hypothesis>Double model width will increase capacity</hypothesis>
+            <change>n_embd doubled in train.py</change>
+            <result>Crash - OOM, status: crash</result>
+          </experiment>
+        </sample_experiments>
+      </step>
+
+      <step number="4">
+        <description>Summarize findings</description>
+        <approach>
+          Review results.tsv, identify best configuration, document patterns.
+        </approach>
+      </step>
+    </workflow>
+
+    <completion>
+      Research session completed: 100 experiments run, best val_bpb improved from
+      0.9979 to 0.9891 (0.86% improvement). Key finding: learning rate tuning
+      provided the most consistent improvements.
+    </completion>
+
+    <key_takeaways>
+      <takeaway>Learning rate changes provide the most reliable improvements</takeaway>
+      <takeaway>Architecture changes carry higher risk of OOM crashes</takeaway>
+      <takeaway>Systematic exploration outperforms random changes</takeaway>
+    </key_takeaways>
+  </example>
+
+  <example name="small_gpu_research">
+    <scenario>
+      User has a MacBook with limited GPU memory and wants to run research
+      with adjusted parameters.
+    </scenario>
+
+    <user_request>
+      I have a MacBook with limited GPU memory. Can I still run autoresearch?
+    </user_request>
+
+    <workflow>
+      <step number="1">
+        <description>Adapt configuration for small GPU</description>
+        <approach>
+          Apply small GPU tuning: reduce vocab_size, MAX_SEQ_LEN, DEPTH,
+          WINDOW_PATTERN, and TOTAL_BATCH_SIZE per the autoresearch skill guidelines.
+        </approach>
+        <expected_outcome>Configuration adjusted for ~8GB VRAM</expected_outcome>
+      </step>
+
+      <step number="2">
+        <description>Verify baseline on small GPU</description>
+        <approach>
+          Run train.py with adjusted parameters, confirm it completes within timeout.
+        </approach>
+      </step>
+
+      <step number="3">
+        <description>Run research with conservative experiments</description>
+        <approach>
+          Prioritize low-memory experiments first (LR tuning, weight decay).
+          Avoid architecture changes that increase model size.
+        </approach>
+      </step>
+    </workflow>
+
+    <completion>
+      Research completed on small GPU with adjusted parameters. Best val_bpb:
+      0.9856, up from baseline 0.9921.
+    </completion>
+  </example>
+</complete_examples>

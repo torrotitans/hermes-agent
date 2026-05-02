@@ -1,0 +1,171 @@
+<complete_examples>
+  <example name="login_spec">
+    <scenario>
+      Create a test plan for login functionality.
+    </scenario>
+
+    <spec_output>
+<![CDATA[
+# User Login Test Plan
+
+## Application Overview
+
+The application provides user authentication and session management.
+Key features include:
+- User login with username and password
+- Session management with token refresh
+- Role-based access control
+- Logout functionality
+
+## Test Scenarios
+
+### 1. Successful Login
+
+**Seed:** `tests/seed.spec.ts`
+
+#### 1.1 Login With Valid Credentials
+
+**Steps:**
+1. Navigate to login page
+2. Enter valid username in username field
+3. Enter valid password in password field
+4. Click Sign In button
+
+**Expected Results:**
+- User is redirected to dashboard
+- Welcome message is displayed with user name
+- User menu shows logged-in user details
+
+#### 1.2 Login With Remember Me
+
+**Steps:**
+1. Navigate to login page
+2. Enter valid username and password
+3. Check Remember Me checkbox
+4. Click Sign In button
+
+**Expected Results:**
+- User is redirected to dashboard
+- Session persists after browser close
+- User not required to login on next visit
+
+### 2. Failed Login
+
+**Seed:** `tests/seed.spec.ts`
+
+#### 2.1 Login With Invalid Password
+
+**Steps:**
+1. Navigate to login page
+2. Enter valid username
+3. Enter invalid password
+4. Click Sign In button
+
+**Expected Results:**
+- Error message displayed: "Invalid credentials"
+- Password field is cleared
+- Username field retains value
+- User remains on login page
+
+#### 2.2 Login With Non-Existent Username
+
+**Steps:**
+1. Navigate to login page
+2. Enter non-existent username
+3. Enter any password
+4. Click Sign In button
+
+**Expected Results:**
+- Error message displayed: "Invalid credentials"
+- No indication which field is incorrect
+- User remains on login page
+
+### 3. Edge Cases
+
+**Seed:** `tests/seed.spec.ts`
+
+#### 3.1 Login With Empty Fields
+
+**Steps:**
+1. Navigate to login page
+2. Leave username and password fields empty
+3. Click Sign In button
+
+**Expected Results:**
+- Validation errors shown for both fields
+- Form does not submit
+- Sign In button remains disabled (if applicable)
+
+#### 3.2 Login With Special Characters
+
+**Steps:**
+1. Navigate to login page
+2. Enter username with special characters: `admin' OR '1'='1`
+3. Enter password with special characters: `password"; DROP TABLE users;`
+4. Click Sign In button
+
+**Expected Results:**
+- Login fails (either invalid credentials or validation error)
+- No SQL injection occurs
+- Application remains stable
+]]>
+    </spec_output>
+
+    <key_takeaways>
+      <takeaway>Include positive, negative, and edge cases</takeaway>
+      <takeaway>Be specific about expected results</takeaway>
+      <takeaway>Reference seed test for patterns</takeaway>
+      <takeaway>Use clear, human-readable language</takeaway>
+    </key_takeaways>
+  </example>
+
+  <example name="dashboard_spec">
+    <scenario>
+      Create a test plan for dashboard functionality.
+    </scenario>
+
+    <spec_output>
+<![CDATA[
+# Dashboard Test Plan
+
+## Application Overview
+
+The dashboard provides an overview of system activity and key metrics.
+Key features include:
+- Activity feed with recent events
+- Summary statistics cards
+- Filter and search functionality
+- Export capabilities
+
+## Test Scenarios
+
+### 1. Dashboard Load
+
+**Seed:** `tests/seed.spec.ts`
+
+#### 1.1 Load Dashboard After Login
+
+**Steps:**
+1. Login with valid credentials
+2. Navigate to dashboard
+
+**Expected Results:**
+- Dashboard loads successfully
+- Activity feed displays recent events
+- Summary cards show current metrics
+- No error messages displayed
+
+#### 1.2 Dashboard With No Data
+
+**Steps:**
+1. Login with user that has no activity
+2. Navigate to dashboard
+
+**Expected Results:**
+- Dashboard loads successfully
+- Activity feed shows "No activity" message
+- Summary cards show zero values
+]]>
+    </spec_output>
+  </example>
+</complete_examples>

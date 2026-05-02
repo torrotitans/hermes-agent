@@ -1,0 +1,158 @@
+<best_practices>
+  <general_principles>
+    <principle priority="high">
+      <name>Page Object Model Pattern</name>
+      <description>
+        Always create Page Object classes that encapsulate page elements and interactions.
+        Each page object should represent a logical page or component in the application.
+      </description>
+      <rationale>
+        POM provides maintainability, reusability, and clear separation between test logic and UI structure.
+      </rationale>
+      <example>
+        <scenario>When testing a login flow</scenario>
+        <good>
+          Create LoginPage class with methods like login(), verify_loaded(), navigate()
+        </good>
+        <bad>
+          Direct locator access in test functions without abstraction
+        </bad>
+      </example>
+    </principle>
+
+    <principle priority="high">
+      <name>Web-First Assertions</name>
+      <description>
+        Use Playwright's web-first assertions that auto-wait for elements.
+        Prefer expect(page.locator()).to_be_visible() over manual waits.
+      </description>
+      <rationale>
+        Auto-waiting eliminates flaky tests and reduces test execution time.
+      </rationale>
+      <example>
+        <scenario>Verifying element visibility</scenario>
+        <good>
+          await expect(page.get_by_role("button")).to_be_visible()
+        </good>
+        <bad>
+          await page.wait_for_timeout(5000)
+          assert page.locator("button").is_visible()
+        </bad>
+      </example>
+    </principle>
+
+    <principle priority="high">
+      <name>FN Documentation Headers</name>
+      <description>
+        Every test file and Page Object class must include FN: docstring headers
+        following the Agentic Class Method pattern.
+      </description>
+      <rationale>
+        Enables AI agents to quickly understand test structure without reading full implementation.
+      </rationale>
+    </principle>
+  </general_principles>
+
+  <code_conventions>
+    <convention category="naming">
+      <rule>Test files: test_*.py or *.spec.ts</rule>
+      <rule>Page objects: *_page.py with *Page class naming</rule>
+      <rule>Test functions: test_<action>_<expectation></rule>
+      <examples>
+        <good>test_login_page_load.py</good>
+        <good>test_dashboard_displays_user_name.py</good>
+        <good>login_page.py</good>
+        <bad>loginTest.py</bad>
+        <bad>test_login.py</bad>
+      </examples>
+    </convention>
+
+    <convention category="structure">
+      <rule>One Page Object per file</rule>
+      <rule>Group related tests in describe/test blocks</rule>
+      <template>
+# FN:test_login_flow.py
+"""
+FN:test_login_flow.py
+Contains 1 class. Tests for the Login Flow.
+
+Primary: TestLoginFlow.test_login_page_load
+
+Classes:
+- TestLoginFlow: Test suite for Login Flow (lines 20-60)
+
+Functions:
+- FN:test_login_page_load: Verify login page loads (lines 26-38)
+"""
+
+class TestLoginFlow:
+    """FN:TestLoginFlow - Test suite for Login Flow."""
+    
+    def test_login_page_load(self, page: Page, base_url: str):
+        """FN:test_login_page_load - Verify login page loads."""
+        # Test implementation
+      </template>
+    </convention>
+
+    <convention category="locators">
+      <rule>Prefer user-facing locators (get_by_role, get_by_text, get_by_label)</rule>
+      <rule>Avoid XPath and CSS selectors when possible</rule>
+      <examples>
+        <good>page.get_by_role("button", name="Sign In")</good>
+        <good>page.get_by_label("Username")</good>
+        <bad>page.locator("//button[@class='btn']")</bad>
+        <bad>page.locator(".submit-btn")</bad>
+      </examples>
+    </convention>
+  </code_conventions>
+
+  <common_pitfalls>
+    <pitfall>
+      <description>Using hardcoded waits</description>
+      <why_problematic>
+        Hardcoded waits make tests slow and flaky. Elements may load faster or slower.
+      </why_problematic>
+      <correct_approach>
+        Use Playwright's auto-waiting assertions that wait for elements to be in expected state.
+      </correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Testing implementation details</description>
+      <why_problematic>
+        Tests break when UI implementation changes but functionality remains same.
+      </why_problematic>
+      <correct_approach>
+        Test user-visible behavior and outcomes, not internal states.
+      </correct_approach>
+    </pitfall>
+
+    <pitfall>
+      <description>Missing test data management</description>
+      <why_problematic>
+        Tests depend on specific data state that may change.
+      </why_problematic>
+      <correct_approach>
+        Use fixtures to set up test data and clean up after tests.
+      </correct_approach>
+    </pitfall>
+  </common_pitfalls>
+
+  <quality_checklist>
+    <category name="before_starting">
+      <item>Understand user story acceptance criteria</item>
+      <item>Review existing Page Object Models</item>
+      <item>Identify required test data</item>
+    </category>
+    <category name="during_implementation">
+      <item>Use semantic locators</item>
+      <item>Add FN: documentation headers</item>
+      <item>Implement proper assertions</item>
+    </category>
+    <category name="before_completion">
+      <item>Verify test runs independently</item>
+      <item>Check test covers all acceptance criteria</item>
+      <item>Ensure test documentation is complete</item>
+    </category>
+  </quality_checklist>
+</best_practices>

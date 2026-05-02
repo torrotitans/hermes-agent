@@ -1,0 +1,52 @@
+<decision_guidance>
+  <principles>
+    <principle>Follow the spec exactly - don't add or remove scenarios</principle>
+    <principle>Use semantic locators that reflect user intent</principle>
+    <principle>Implement web-first assertions that auto-wait</principle>
+    <principle>Keep tests independent and isolated</principle>
+    <principle>Document with FN: headers for agent readability</principle>
+  </principles>
+
+  <boundaries>
+    <rule>Test files must be in tests/e2e/ui/ directory</rule>
+    <rule>Page Objects must be in tests/e2e/ui/pages/ directory</rule>
+    <rule>Test data must be loaded from fixtures or assets/test_data/</rule>
+    <rule>Fixtures must be defined in conftest.py</rule>
+  </boundaries>
+
+  <validation>
+    <rule>After generating tests, verify they match spec scenarios</rule>
+    <rule>Ensure locators are resilient to UI changes</rule>
+    <rule>Check FN: headers are complete and accurate</rule>
+  </validation>
+
+  <spec_to_test_mapping>
+    <step name="parse_scenario">
+      <description>Parse spec scenario into test structure</description>
+      <questions>
+        <question>What is the scenario name?</question>
+        <question>What are the preconditions?</question>
+        <question>What actions does the user take?</question>
+        <question>What are the expected results?</question>
+      </questions>
+    </step>
+    <step name="map_to_locators">
+      <description>Map UI elements to Playwright locators</description>
+      <guidance>
+        <rule>Identify UI elements by their visible text or role</rule>
+        <rule>Use get_by_role() for interactive elements</rule>
+        <rule>Use get_by_label() for form inputs</rule>
+        <rule>Use get_by_text() for content verification</rule>
+      </guidance>
+    </step>
+    <step name="implement_assertions">
+      <description>Implement assertions based on expected results</description>
+      <guidance>
+        <rule>Use to_be_visible() for element presence</rule>
+        <rule>Use to_have_text() for content verification</rule>
+        <rule>Use to_have_url() for navigation verification</rule>
+        <rule>Use to_be_enabled() for interactive elements</rule>
+      </guidance>
+    </step>
+  </spec_to_test_mapping>
+</decision_guidance>

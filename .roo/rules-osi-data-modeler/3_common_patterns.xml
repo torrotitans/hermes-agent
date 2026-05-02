@@ -1,0 +1,217 @@
+<common_patterns>
+  <overview>
+    Reusable patterns for common OSI data modeling scenarios.
+  </overview>
+
+  <pattern name="fact_dimension_model">
+    <title>Star Schema: Fact + Dimensions</title>
+    <description>
+      The most common pattern: a central fact table with foreign keys to dimension tables.
+      Used for sales, transactions, events, and other analytical workloads.
+    </description>
+    <template>
+semantic_model:
+  - name: sales_analytics
+    description: Sales analytics semantic model
+    ai_context:
+      instructions: "Use for sales analysis, customer insights, and product performance"
+    datasets:
+      - name: sales
+        source: analytics.public.sales
+        primary_key: [sale_id]
+        description: Sales transactions fact table
+        fields:
+          - name: customer_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: customer_id
+            description: Foreign key to customer dimension
+          - name: sale_amount
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: sale_amount
+            description: Total sale amount
+      - name: customers
+        source: analytics.public.customers
+        primary_key: [customer_id]
+        description: Customer dimension table
+        fields:
+          - name: customer_id
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: customer_id
+          - name: customer_name
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: customer_name
+    relationships:
+      - name: sales_to_customers
+        from: sales
+        to: customers
+        from_columns: [customer_id]
+        to_columns: [customer_id]
+    metrics:
+      - name: total_sales
+        expression:
+          dialects:
+            - dialect: ANSI_SQL
+              expression: SUM(sales.sale_amount)
+        description: Total sales amount
+    </template>
+  </pattern>
+
+  <pattern name="time_dimension">
+    <title>Time Dimension with Temporal Attributes</title>
+    <description>
+      A date dimension table with multiple time-granularity fields for time-series analysis.
+    </description>
+    <template>
+      - name: date_dim
+        source: analytics.public.date_dim
+        primary_key: [date_sk]
+        description: Date dimension with calendar attributes
+        fields:
+          - name: date_sk
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: date_sk
+          - name: calendar_date
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: calendar_date
+            dimension:
+              is_time: true
+          - name: year
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: EXTRACT(YEAR FROM calendar_date)
+            dimension:
+              is_time: true
+          - name: quarter
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: CONCAT(EXTRACT(YEAR FROM calendar_date), 'Q', EXTRACT(QUARTER FROM calendar_date))
+            dimension:
+              is_time: true
+          - name: month_name
+            expression:
+              dialects:
+                - dialect: ANSI_SQL
+                  expression: TO_CHAR(calendar_date, 'Month')
+            dimension:
+              is_time: true
+    </template>
+  </pattern>
+
+  <pattern name="composite_relationship">
+    <title>Composite Key Relationship</title>
+    <description>
+      Relationships where multiple columns form the join key.
+      Common in slowly changing dimensions and line-item fact tables.
+    </description>
+    <template>
+relationships:
+  - name: order_lines_to_products
+    from: order_lines
+    to: products
+    from_columns: [product_id, variant_id]
+    to_columns: [product_id, variant_id]
+    </template>
+  </pattern>
+
+  <pattern name="computed_field">
+    <title>Computed/Calculated Fields</title>
+    <description>
+      Fields derived from expressions rather than direct column references.
+      Used for names, prices, and derived metrics at the field level.
+    </description>
+    <template>
+fields:
+  - name: full_name
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: first_name || ' ' || last_name
+    description: Customer full name
+    ai_context:
+      synonyms: ["name", "customer name"]
+  - name: extended_price
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: quantity * unit_price
+    description: Line item total price
+    </template>
+  </pattern>
+
+  <pattern name="multi_dialect_metric">
+    <title>Multi-Dialect Metric</title>
+    <description>
+      Metrics with platform-specific expression variations.
+      Essential when the same model targets multiple execution engines.
+    </description>
+    <template>
+metrics:
+  - name: year_over_year_growth
+    expression:
+      dialects:
+        - dialect: ANSI_SQL
+          expression: >
+            (SUM(current_year.revenue) - SUM(previous_year.revenue))
+            / NULLIF(SUM(previous_year.revenue), 0)
+        - dialect: SNOWFLAKE
+          expression: >
+            (SUM(current_year.revenue) - SUM(previous_year.revenue))
+            / NULLIF(SUM(previous_year.revenue)::FLOAT, 0)
+        - dialect: DATABRICKS
+          expression: >
+            (SUM(current_year.revenue) - SUM(previous_year.revenue))
+            / NULLIF(SUM(previous_year.revenue), 0)
+    description: Revenue growth year over year
+    </template>
+  </pattern>
+
+  <pattern name="vendor_extension">
+    <title>Vendor-Specific Extensions</title>
+    <description>
+      Platform-specific metadata embedded in custom_extensions.
+      Allows the same OSI model to carry platform-specific configuration.
+    </description>
+    <template>
+custom_extensions:
+  - vendor_name: DBT
+    data: '{"project_name": "analytics", "materialized": "view", "tags": ["daily", "core"]}'
+  - vendor_name: SNOWFLAKE
+    data: '{"warehouse": "ANALYTICS_WH", "database": "PROD", "schema": "PUBLIC"}'
+  - vendor_name: SALESFORCE
+    data: '{"tableau_workbook_id": "sales_dashboard", "einstein_enabled": true}'
+    </template>
+  </pattern>
+
+  <pattern name="ai_context_enrichment">
+    <title>Rich AI Context for LLMs</title>
+    <description>
+      Structured ai_context that helps LLMs understand business meaning
+      and generate accurate natural language to SQL queries.
+    </description>
+    <template>
+ai_context:
+  instructions: "Use this model for retail analytics. Supports time-based analysis, customer segmentation, and product performance metrics."
+  synonyms:
+    - "sales"
+    - "revenue"
+    - "transactions"
+  examples:
+    - "Show me total revenue by month"
+    - "Top 10 customers by purchase amount"
+    </template>
+  </pattern>
+</common_patterns>

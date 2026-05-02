@@ -1,0 +1,136 @@
+<workflow_instructions>
+  <mode_overview>
+    Playwright Test Generator mode converts structured test specifications into
+    comprehensive, maintainable Playwright tests following Page Object Model patterns.
+  </mode_overview>
+
+  <initialization_steps>
+    <step number="1">
+      <action>Read the test specification</action>
+      <details>
+        Parse specs/<feature>.md to understand:
+        - Application overview
+        - Test scenarios with steps
+        - Expected results
+        - Test data requirements
+      </details>
+    </step>
+
+    <step number="2">
+      <action>Review existing test infrastructure</action>
+      <details>
+        Check existing structure:
+        - tests/seed.spec.ts or tests/seed.spec.py for patterns
+        - tests/e2e/ui/pages/ for existing Page Objects
+        - tests/e2e/ui/conftest.py for fixtures
+        - tests/e2e/ui/tasks/ for helper functions
+      </details>
+    </step>
+  </initialization_steps>
+
+  <main_workflow>
+    <phase name="analysis">
+      <description>Analyze spec and identify implementation needs</description>
+      <steps>
+        <step>Map each test scenario to a test function</step>
+        <step>Identify UI elements that need Page Object methods</step>
+        <step>Identify required fixtures and test data</step>
+        <step>Determine if new Page Objects are needed</step>
+      </steps>
+    </phase>
+
+    <phase name="documentation_fetch">
+      <description>Fetch relevant Playwright documentation</description>
+      <steps>
+        <step>Use web-crawler skill to fetch Playwright docs</step>
+        <step>Convert documentation to markdown using web-to-markdown skill</step>
+        <step>Extract relevant patterns for locators and assertions</step>
+      </steps>
+    </phase>
+
+    <phase name="page_object_creation">
+      <description>Create or update Page Object Models</description>
+      <steps>
+        <step>Create new Page Object classes for UI components</step>
+        <step>Add methods for user interactions</step>
+        <step>Add properties for locators</step>
+        <step>Include FN: documentation headers</step>
+      </steps>
+    </phase>
+
+    <phase name="test_generation">
+      <description>Generate test files from specifications</description>
+      <steps>
+        <step>Create test file in tests/e2e/ui/ directory</step>
+        <step>Add FN: documentation headers</step>
+        <step>Implement test functions following spec scenarios</step>
+        <step>Use Page Objects for UI interactions</step>
+        <step>Implement assertions based on expected results</step>
+      </steps>
+    </phase>
+
+    <phase name="validation">
+      <description>Verify test implementation</description>
+      <steps>
+        <step>Check test follows project conventions</step>
+        <step>Verify locators are semantic and resilient</step>
+        <step>Ensure assertions are specific and meaningful</step>
+        <step>Confirm FN: headers are complete</step>
+      </steps>
+    </phase>
+  </main_workflow>
+
+  <implementation_patterns>
+    <pattern name="test_from_scenario">
+      <description>Convert spec scenario to test function</description>
+      <template>
+<![CDATA[
+def test_<scenario_name>(self, page: Page, base_url: str, fixture_name: dict):
+    """FN:test_<scenario_name> - Verify <expected outcome>."""
+    # Arrange - Set up page objects
+    page_obj = <Page>Page(page)
+    
+    # Act - Perform user actions from spec steps
+    page_obj.navigate()
+    page_obj.<action_method>(<parameters>)
+    
+    # Assert - Verify expected results
+    expect(page).to_have_url("<expected_url>")
+    expect(page_obj.<element>).to_be_visible()
+]]>
+      </template>
+    </pattern>
+
+    <pattern name="page_object_with_locators">
+      <description>Create Page Object with semantic locators</description>
+      <template>
+<![CDATA[
+class <Page>Page:
+    """FN:<Page>Page - Page Object for <Page Name>."""
+    
+    def __init__(self, page: Page):
+        """FN:__init__ - Initialize with Page instance."""
+        self.page = page
+    
+    @property
+    def <element_name>(self):
+        """FN:<element_name> - Returns <element> locator."""
+        return self.page.get_by_role("<role>", name="<name>")
+    
+    def <action>(self, <parameters>):
+        """FN:<action> - Perform <action> on page."""
+        self.<element_name>.fill(<parameters>)
+]]>
+      </template>
+    </pattern>
+  </implementation_patterns>
+
+  <completion_criteria>
+    <criterion>Test file created in tests/e2e/ui/ directory</criterion>
+    <criterion>All scenarios from spec have corresponding test functions</criterion>
+    <criterion>Page Objects created/updated for UI components</criterion>
+    <criterion>Tests use semantic locators (get_by_role, get_by_label)</criterion>
+    <criterion>Assertions use Playwright web-first assertions</criterion>
+    <criterion>FN: documentation headers are complete and accurate</criterion>
+  </completion_criteria>
+</workflow_instructions>

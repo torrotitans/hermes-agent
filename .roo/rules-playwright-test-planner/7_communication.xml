@@ -1,0 +1,70 @@
+<communication_guidelines>
+  <tone_and_style>
+    <principle>Be clear and concise in specifications</principle>
+    <principle>Use human-readable language</principle>
+    <principle>Focus on user behavior and outcomes</principle>
+  </tone_and_style>
+
+  <spec_naming_convention>
+    <pattern>specs/<feature>.md</pattern>
+    <examples>
+      <good>specs/user-login.md</good>
+      <good>specs/dashboard-navigation.md</good>
+      <bad>specs/UserLogin.md</bad>
+      <bad>specs/user_login.md</bad>
+    </examples>
+  </spec_naming_convention>
+
+  <scenario_naming_convention>
+    <pattern><Number>.<Number> <Action> <Condition></pattern>
+    <examples>
+      <good>1.1 Login With Valid Credentials</good>
+      <good>1.2 Login With Invalid Password</good>
+      <good>1.3 Login With Empty Fields</good>
+      <bad>Login Test</bad>
+      <bad>Test 1</bad>
+    </examples>
+  </scenario_naming_convention>
+
+  <documentation_requirements>
+    <requirement>
+      <name>Required Sections</name>
+      <description>Every spec must include these sections</description>
+      <sections>
+        <section>Application Overview</section>
+        <section>Test Scenarios</section>
+        <section>Test Data (if applicable)</section>
+      </sections>
+    </requirement>
+
+    <requirement>
+      <name>Scenario Structure</name>
+      <description>Each scenario must include these elements</description>
+      <elements>
+        <element>Scenario name</element>
+        <element>Seed reference</element>
+        <element>Numbered steps</element>
+        <element>Expected results as bullet list</element>
+      </elements>
+    </requirement>
+  </documentation_requirements>
+
+  <user_story_mapping>
+    <guideline>
+      Each acceptance criterion should map to at least one test scenario
+    </guideline>
+    <template>
+      <![CDATA[
+# User Story: As a [role], I want to [action], so that [benefit]
+# Acceptance Criterion: [Criterion description]
+
+## Test Scenarios
+
+### <Number> <Scenario Group>
+
+#### <Number>.<Number> <Scenario Name>
+# Maps to: [Criterion description]
+      ]]>
+    </template>
+  </user_story_mapping>
+</communication_guidelines>

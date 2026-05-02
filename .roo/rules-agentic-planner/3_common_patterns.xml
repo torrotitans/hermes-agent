@@ -1,0 +1,127 @@
+<common_patterns>
+  <pattern name="yaml_frontmatter_template">
+    <description>Standardized YAML frontmatter for all plan.md files</description>
+    <template>
+---
+Create Date: YYYY-MM-DD
+Update Date: YYYY-MM-DD
+IDE: Roo Code
+Agent: <model_name>
+GitHub committer: <User Name>
+Sprint: Sprint #<N>
+---
+    </template>
+  </pattern>
+
+  <pattern name="subtask_template">
+    <description>Command-level sub-task structure for anti-hallucination compliance</description>
+    <template>
+### Task <N>: <Task Name>
+- [ ] Status: Pending
+- **Objective:** <Single, well-defined outcome>
+- **Input Contract:**
+  - Read: <file_path> (lines <start>-<end>)
+  - Read: <file_path> (lines <start>-<end>)
+- **Output Contract:**
+  - Create: <file_path> (~<line_count> lines)
+  - Modify: <file_path> (add <content> at line <n>)
+- **Exact Commands:**
+  ```bash
+  # Step 1: <action>
+  <command>
+
+  # Step 2: <action>
+  <command>
+  ```
+- **Expected Output:** <success pattern>
+- **Fallback Path:** <troubleshooting steps>
+- **Dependencies:** Task <N>
+- **Estimated Time:** <N> minutes
+- **Context Firewall:**
+  - Required: <specific functions, types, docs>
+  - Excluded: <out-of-scope items>
+    </template>
+  </pattern>
+
+  <pattern name="dag_structure">
+    <description>Hierarchical Task Network with phase-based grouping</description>
+    <template>
+## Tasks (DAG)
+
+### Phase 1: <Phase Name>
+- **Token Budget:** 1M
+- **Entry Criteria:** <conditions to start>
+- **Exit Criteria:** <conditions to complete>
+
+### Phase 2: <Phase Name>
+- **Token Budget:** 1M
+- **Entry Criteria:** Phase 1 complete
+- **Exit Criteria:** <conditions to complete>
+    </template>
+  </pattern>
+
+  <pattern name="standup_report_template">
+    <description>Daily standup report structure for Jira-style progress tracking</description>
+    <template>
+---
+Date: YYYY-MM-DD
+Sprint: Sprint #<N>
+Plan File: agentic/plan/YYYYMMDD_taskname.md
+---
+
+# Daily Standup Report - YYYY-MM-DD
+
+## Yesterday's Progress (Completed Tasks)
+
+| Task ID | Task Name | Status | Time Taken | Verification |
+|---------|-----------|--------|------------|--------------|
+| T1 | <name> | DONE | <N> min | <verification> |
+
+## Today's Plan (Pending Tasks)
+
+| Task ID | Task Name | Priority | Dependencies | Est. Time |
+|---------|-----------|----------|--------------|-----------|
+| T3 | <name> | High | T1 | <N> min |
+
+## Blockers
+
+- [ ] None / <describe blocker and who can help>
+
+## Next Day Plan
+
+- Complete Task T3: <name>
+  - Command: <exact command>
+  - Expected: <expected output>
+
+## Metrics
+
+- Tasks Completed: <N>
+- Tasks Pending: <N>
+- Blockers: <N>
+- Total Time Spent: <N> min
+    </template>
+  </pattern>
+
+  <pattern name="context_firewall_template">
+    <description>Per-task context firewall definition</description>
+    <template>
+- **Context Firewall:**
+  - Required:
+    - Functions: <function_names>
+    - Types: <type_names>
+    - Documentation: <doc_files>
+  - Excluded:
+    - <out_of_scope_modules>
+    - <unrelated_files>
+    </template>
+  </pattern>
+
+  <pattern name="state_archiving">
+    <description>Plan state archiving workflow</description>
+    <steps>
+      <step>Move outdated plans from agentic/plan/ to agentic/plan/archive/</step>
+      <step>Maintain chronological naming in archive</step>
+      <step>Ensure clean workspace in agentic/plan/ for active plans</step>
+    </steps>
+  </pattern>
+</common_patterns>

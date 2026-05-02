@@ -1,0 +1,126 @@
+<error_handling>
+  <overview>
+    Common error scenarios in OSI data modeling and their resolutions.
+  </overview>
+
+  <error_scenario>
+    <name>Schema Validation Failure</name>
+    <description>
+      The OSI validator reports schema errors when the YAML does not conform to the
+      OSI JSON schema (osi-schema.json).
+    </description>
+    <common_causes>
+      <cause>Missing required fields (name, source, expression)</cause>
+      <cause>Invalid dialect values (must be from enum: ANSI_SQL, SNOWFLAKE, MDX, TABLEAU, DATABRICKS)</cause>
+      <cause>Invalid vendor values in custom_extensions</cause>
+      <cause>Incorrect data types (e.g., string instead of array for datasets)</cause>
+    </common_causes>
+    <resolution>
+      Run the validator: python3 validation/validate.py [model_file]
+      Fix each reported error by checking the path and message.
+      Refer to core-spec/osi-schema.json for the exact schema definition.
+    </resolution>
+  </error_scenario>
+
+  <error_scenario>
+    <name>Duplicate Name Error</name>
+    <description>
+      The validator reports duplicate names within datasets, fields, metrics, or relationships.
+    </description>
+    <common_causes>
+      <cause>Two datasets with the same name in one model</cause>
+      <cause>Two fields with the same name within one dataset</cause>
+      <cause>Two metrics with the same name in one model</cause>
+    </common_causes>
+    <resolution>
+      Rename the duplicate entity to a unique name.
+      Use the dataset name as a prefix if needed (e.g., orders_order_id vs order_id).
+    </resolution>
+  </error_scenario>
+
+  <error_scenario>
+    <name>Invalid Reference Error</name>
+    <description>
+      A relationship references a dataset that does not exist in the model.
+    </description>
+    <common_causes>
+      <cause>Typo in the from or to field of a relationship</cause>
+      <cause>Dataset was renamed but relationship was not updated</cause>
+      <cause>Dataset exists in a different model but not in the current one</cause>
+    </common_causes>
+    <resolution>
+      Verify all dataset names in the model.
+      Update the relationship from/to fields to match existing dataset names exactly.
+    </resolution>
+  </error_scenario>
+
+  <error_scenario>
+    <name>SQL Syntax Error</name>
+    <description>
+      The validator reports invalid SQL syntax in field or metric expressions.
+      This check requires sqlglot to be installed.
+    </description>
+    <common_causes>
+      <cause>Typo in column name within expression</cause>
+      <cause>Invalid SQL function usage</cause>
+      <cause>Mismatched parentheses or quotes</cause>
+    </common_causes>
+    <resolution>
+      Install sqlglot for validation: pip install sqlglot
+      Test the expression in the target SQL dialect.
+      For complex expressions, validate incrementally (test sub-expressions first).
+    </resolution>
+  </error_scenario>
+
+  <error_scenario>
+    <name>Missing Time Dimension Flag</name>
+    <description>
+      Not a validation error, but a quality issue: date columns are not marked with is_time: true.
+    </description>
+    <impact>
+      AI tools cannot automatically apply time-based operations (date truncation, rolling windows)
+      without the is_time flag.
+    </impact>
+    <resolution>
+      Review all date/datetime columns and set dimension.is_time: true.
+      Do NOT set is_time: true for foreign keys to date tables (e.g., sold_date_sk).
+    </resolution>
+  </error_scenario>
+
+  <error_scenario>
+    <name>Relationship Column Mismatch</name>
+    <description>
+      Relationship from_columns or to_columns reference columns that do not exist in the
+      respective datasets.
+    </description>
+    <impact>
+      Join path resolution fails, preventing cross-dataset metrics and AI query generation.
+    </impact>
+    <resolution>
+      Verify each column in from_columns exists in the from dataset's fields.
+      Verify each column in to_columns exists in the to dataset's fields.
+      Ensure the column order matches between from_columns and to_columns.
+    </resolution>
+  </error_scenario>
+
+  <error_scenario>
+    <name>Version Mismatch</name>
+    <description>
+      The model file specifies a version that does not match the current OSI specification.
+    </description>
+    <resolution>
+      Update the version header to match the current specification: version: "0.1.1"
+      Check core-spec/spec.yaml for the latest version.
+    </resolution>
+  </error_scenario>
+
+  <recovery_protocol>
+    <step number="1">Run the validator and collect all errors</step>
+    <step number="2">Fix schema errors first (missing fields, invalid types)</step>
+    <step number="3">Fix duplicate name errors</step>
+    <step number="4">Fix reference errors (relationships pointing to missing datasets)</step>
+    <step number="5">Fix SQL syntax errors in expressions</step>
+    <step number="6">Re-run validator to confirm all errors are resolved</step>
+    <step number="7">Perform manual review for quality issues (time dimensions, ai_context)</step>
+  </recovery_protocol>
+</error_handling>

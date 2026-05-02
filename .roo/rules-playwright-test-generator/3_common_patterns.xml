@@ -1,0 +1,113 @@
+<common_patterns>
+  <pattern name="basic_page_object">
+    <description>Basic Page Object Model structure</description>
+    <template>
+<![CDATA[
+# FN:<filename>_page.py
+"""
+FN:<filename>_page.py
+Contains 1 class. Page Object for <Page Name>.
+
+Primary: <ClassName>.__init__
+
+Classes:
+- <ClassName>: Page Object for <Page Name>
+
+Functions:
+- FN:__init__: Initialize page object (lines X-Y)
+- FN:navigate: Navigate to page (lines X-Y)
+- FN:verify_loaded: Verify page loaded (lines X-Y)
+"""
+
+from playwright.sync_api import Page, expect
+
+class <ClassName>:
+    """FN:<ClassName> - Page Object for <Page Name>."""
+    
+    def __init__(self, page: Page):
+        """FN:__init__ - Initialize with Page instance."""
+        self.page = page
+    
+    def navigate(self):
+        """FN:navigate - Navigate to the page."""
+        self.page.goto(self.URL)
+    
+    def verify_loaded(self):
+        """FN:verify_loaded - Verify page is loaded."""
+        expect(self.page).to_have_title(self.TITLE)
+]]>
+    </template>
+  </pattern>
+
+  <pattern name="test_structure">
+    <description>Standard test file structure</description>
+    <template>
+<![CDATA[
+# FN:test_<feature>.py
+"""
+FN:test_<feature>.py
+Contains 1 class. Tests for <Feature Name>.
+
+Primary: Test<Feature>.test_<first_test>
+
+Classes:
+- Test<Feature>: Test suite for <Feature> (lines X-Y)
+
+Functions:
+- FN:test_<first_test>: Test description (lines X-Y)
+"""
+
+import pytest
+from playwright.sync_api import Page, expect
+from tests.e2e.ui.pages.<page>_page import <Page>Page
+
+class Test<Feature>:
+    """FN:Test<Feature> - Test suite for <Feature>."""
+    
+    def test_<first_test>(self, page: Page, base_url: str):
+        """FN:test_<first_test> - Test description."""
+        # Arrange
+        page_obj = <Page>Page(page)
+        
+        # Act
+        page_obj.navigate()
+        
+        # Assert
+        page_obj.verify_loaded()
+]]>
+    </template>
+  </pattern>
+
+  <pattern name="locator_patterns">
+    <description>Common locator patterns</description>
+    <patterns>
+      <pattern name="button">
+        <code>page.get_by_role("button", name="Submit")</code>
+      </pattern>
+      <pattern name="input">
+        <code>page.get_by_label("Email Address")</code>
+      </pattern>
+      <pattern name="link">
+        <code>page.get_by_text("Sign Up", exact=True)</code>
+      </pattern>
+      <pattern name="checkbox">
+        <code>page.get_by_role("checkbox").check()</code>
+      </pattern>
+    </patterns>
+  </pattern>
+
+  <pattern name="assertion_patterns">
+    <description>Common assertion patterns</description>
+    <patterns>
+      <pattern name="visibility">
+        <code>await expect(locator).to_be_visible()</code>
+      </pattern>
+      <pattern name="text_content">
+        <code>await expect(locator).to_have_text("Expected")</code>
+      </pattern>
+      <pattern name="url">
+        <code>await expect(page).to_have_url("/expected")</code>
+      </pattern>
+    </patterns>
+  </pattern>
+</common_patterns>

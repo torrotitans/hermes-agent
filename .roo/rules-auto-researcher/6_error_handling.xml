@@ -1,0 +1,113 @@
+<error_handling>
+  <overview>
+    Error scenarios, recovery procedures, and graceful failure handling
+    for autonomous research experiments.
+  </overview>
+
+  <error_scenarios>
+    <scenario name="oom_crash">
+      <description>Out of memory error during training</description>
+      <symptoms>
+        - CUDA out of memory error in run.log
+        - peak_vram_mb exceeds available GPU memory
+      </symptoms>
+      <recovery>
+        <step>Log as "crash" in results.tsv</step>
+        <step>git reset --hard HEAD~1</step>
+        <step>Reduce model size or batch size for next experiment</step>
+      </recovery>
+      <prevention>
+        - Check current peak_vram_mb before proposing memory-intensive changes
+        - For small GPUs, reduce n_embd or n_layer instead of increasing them
+      </prevention>
+    </scenario>
+
+    <scenario name="nan_loss">
+      <description>Training produces NaN loss values</description>
+      <symptoms>
+        - val_bpb shows NaN or inf in output
+        - Training loss becomes NaN during training
+      </symptoms>
+      <recovery>
+        <step>Log as "crash" in results.tsv</step>
+        <step>git reset --hard HEAD~1</step>
+        <step>Reduce learning rate for next experiment</step>
+      </recovery>
+      <prevention>
+        - Start with conservative learning rates
+        - Ensure gradient clipping is enabled
+      </prevention>
+    </scenario>
+
+    <scenario name="timeout">
+      <description>Training exceeds the 10-minute timeout</description>
+      <symptoms>
+        - Process killed after 10 minutes
+        - No complete results in run.log
+      </symptoms>
+      <recovery>
+        <step>Log as "crash" in results.tsv</step>
+        <step>git reset --hard HEAD~1</step>
+        <step>Reduce batch size or model size for faster training</step>
+      </recovery>
+      <prevention>
+        - Keep TOTAL_BATCH_SIZE at powers of 2
+        - Monitor training_seconds in previous runs
+      </prevention>
+    </scenario>
+
+    <scenario name="git_conflict">
+      <description>Git state is dirty or has uncommitted changes</description>
+      <symptoms>
+        - git commit fails with uncommitted changes
+        - Branch has unexpected commits
+      </symptoms>
+      <recovery>
+        <step>Check git status to understand state</step>
+        <step>git stash or git reset as appropriate</step>
+        <step>Ensure clean state before continuing</step>
+      </recovery>
+      <prevention>
+        - Always reset after each experiment (keep or discard)
+        - Never manually commit outside the research loop
+      </prevention>
+    </scenario>
+
+    <scenario name="dependency_error">
+      <description>Missing or incompatible dependencies</description>
+      <symptoms>
+        - uv run fails with import errors
+        - Package version conflicts
+      </symptoms>
+      <recovery>
+        <step>Run uv sync to reinstall dependencies</step>
+        <step>Verify with uv run train.py --help</step>
+      </recovery>
+      <prevention>
+        - Verify dependencies in initialization step
+        - Use uv for reproducible environments
+      </prevention>
+    </scenario>
+  </error_scenarios>
+
+  <graceful_degradation>
+    <case>
+      <condition>Multiple consecutive crashes</condition>
+      <action>Pause research, analyze failure pattern, suggest configuration changes</action>
+    </case>
+    <case>
+      <condition>No improvements after 20 experiments</condition>
+      <action>Suggest exploring new research directions or changing hypothesis strategy</action>
+    </case>
+    <case>
+      <condition>Hardware unavailable during session</condition>
+      <action>Save current state, document progress, resume when hardware is available</action>
+    </case>
+  </graceful_degradation>
+
+  <logging_requirements>
+    <rule>Always log crashes with val_bpb: 0.000000 and memory_gb: 0.0</rule>
+    <rule>Include descriptive status in results.tsv for debugging</rule>
+    <rule>Preserve run.log files for post-mortem analysis</rule>
+  </logging_requirements>
+</error_handling>
