@@ -24,6 +24,7 @@ from pathlib import Path
 
 # Import CLI components
 from cli.structured_io import StructuredIO, Message, MessageType, ControlRequest
+from autonomous import AgenticOrchestrator, TaskType, CircuitBreakerError
 from cli.tui_renderer import TUIRenderer
 from cli.mode_selector import ModeSelector, Mode
 from cli.clarification import ClarificationManager
@@ -139,6 +140,7 @@ def run_interactive(args: argparse.Namespace) -> int:
     permission_mgr = PermissionManager()
     stream_handler = StreamHandler()
     mode_selector = ModeSelector()
+    orchestrator = AgenticOrchestrator()
     
     # Create AI provider from config.ini model name
     try:
@@ -202,6 +204,19 @@ def run_interactive(args: argparse.Namespace) -> int:
             if ambiguities:
                 print(f"Ambiguity detected: {', '.join(ambiguities)}")
             
+            # Route task through orchestrator
+            try:
+                task_id = orchestrator.route_task(
+                    task_type=TaskType.SIMPLE,
+                    description=user_input,
+                    payload={"input": user_input}
+                )
+                logger.debug("FN:run_interactive Task routed: %s", task_id)
+            except CircuitBreakerError as e:
+                print(f"\nCircuit Breaker: {e}")
+                print("Please rephrase your request or try a different approach.")
+                continue
+            
             # Generate response
             print("\nAssistant: ", end="")
             response = ""
@@ -209,6 +224,9 @@ def run_interactive(args: argparse.Namespace) -> int:
                 print(token, end="", flush=True)
                 response += token
             print("\n")
+            
+            # Record command for frequency analysis
+            orchestrator.record_command(user_input)
             
             # Save to session
             session_db.add_message(session_id, "user", user_input)
