@@ -241,6 +241,16 @@ class AgenticOrchestrator:
         
         return None
     
+    def record_command(self, command: str) -> None:
+        """
+        FN:record_command Record a command for frequency analysis.
+        
+        Args:
+            command: Command description to record
+        """
+        self._command_history[command] += 1
+        logger.debug("FN:record_command Command recorded: %s", command)
+    
     def get_command_frequency(self) -> Dict[str, int]:
         """
         FN:get_command_frequency Get frequency count of commands.

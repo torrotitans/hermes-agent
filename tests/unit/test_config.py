@@ -12,7 +12,7 @@ import pytest
 import tempfile
 import os
 
-from config import (
+from torro.config import (
     Config,
     TorroConfig,
     OpenAIConfig,

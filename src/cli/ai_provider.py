@@ -21,6 +21,7 @@ Functions:
 
 import configparser
 import json
+import logging
 import os
 import time
 from abc import ABC, abstractmethod
@@ -28,6 +29,8 @@ from typing import Optional, Generator, Dict, Any, List, Tuple
 from dataclasses import dataclass
 from pathlib import Path
 import requests
+
+logger = logging.getLogger(__name__)
 
 
 # Default configuration paths
@@ -303,6 +306,42 @@ class OllamaProvider(AIProvider):
         super().__init__(config)
         self.endpoint = f"{config.base_url}/api/generate"
 
+    def health_check(self) -> Tuple[bool, str]:
+        """
+        FN:health_check Check if Ollama API is available and model exists.
+
+        Returns:
+            Tuple of (is_healthy, error_message)
+        """
+        try:
+            response = self._session.get(
+                f"{self.config.base_url}/api/tags",
+                timeout=5
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            # Check if the specific model is loaded
+            models = data.get("models", [])
+            model_names = [m.get("name", "") for m in models]
+            
+            if self.config.model_name not in model_names:
+                return (
+                    False,
+                    f"Ollama is running but model '{self.config.model_name}' is not loaded. "
+                    f"Available models: {', '.join(model_names) if model_names else 'none'}"
+                )
+            
+            return (True, f"Ollama API is available with model '{self.config.model_name}'")
+        except requests.exceptions.ConnectionError:
+            return (False, "Cannot connect to Ollama. Is it running?")
+        except requests.exceptions.Timeout:
+            return (False, "Ollama API timed out")
+        except requests.exceptions.HTTPError as e:
+            return (False, f"Ollama API error: {e}")
+        except (json.JSONDecodeError, KeyError) as e:
+            return (False, f"Failed to parse Ollama response: {e}")
+
     def generate(
         self,
         prompt: str,
@@ -340,18 +379,39 @@ class OllamaProvider(AIProvider):
         if system_prompt:
             payload["system"] = system_prompt
 
-        response = self._session.post(
-            self.endpoint,
-            json=payload,
-            stream=True,
-            timeout=120
-        )
-        response.raise_for_status()
+        try:
+            response = self._session.post(
+                self.endpoint,
+                json=payload,
+                stream=True,
+                timeout=120
+            )
+            # Debug: log response status and content-type
+            logger.debug("Ollama POST status=%d content-type=%s", response.status_code, response.headers.get("content-type", "unknown"))
+            response.raise_for_status()
 
-        for line in response.iter_lines():
-            if line:
-                data = json.loads(line)
-                yield data.get("response", "")
+            for line_num, raw_line in enumerate(response.iter_lines()):
+                if raw_line:
+                    # Decode bytes to string with error handling
+                    line = raw_line.decode("utf-8", errors="replace")
+                    logger.debug("Ollama line %d: %s", line_num, line[:200])
+                    try:
+                        data = json.loads(line)
+                        yield data.get("response", "")
+                    except json.JSONDecodeError as parse_err:
+                        logger.error("JSON parse error on line %d: %s | raw bytes: %s | decoded: %s",
+                                     line_num, parse_err, raw_line[:200], line[:200])
+                        # Yield diagnostic info instead of crashing
+                        error_msg = (f"\n[Error] Non-JSON response from Ollama (line {line_num})\n")
+                        error_msg += f"Raw bytes: {raw_line[:200]}\n"
+                        error_msg += f"JSON error: {parse_err}\n"
+                        error_msg += f"Endpoint: {self.endpoint}\n"
+                        yield error_msg
+        except requests.exceptions.RequestException as e:
+            # Yield error message as part of stream
+            error_msg = f"\n\n[Error] API request failed: {str(e)}\n"
+            error_msg += "Please check if Ollama is running and the model is available.\n"
+            yield error_msg
 
 
 class OpenAIProvider(AIProvider):
@@ -360,7 +420,36 @@ class OpenAIProvider(AIProvider):
     def __init__(self, config: ModelConfig):
         """Initialize OpenAI provider."""
         super().__init__(config)
-        self.endpoint = f"{config.base_url}/v1/chat/completions"
+        # Avoid double /v1 if base_url already contains it
+        base = config.base_url
+        if base.endswith("/v1"):
+            self.endpoint = f"{base}/chat/completions"
+        elif "/v1/" in base:
+            self.endpoint = f"{base}chat/completions"
+        else:
+            self.endpoint = f"{base}/v1/chat/completions"
+
+    def health_check(self) -> Tuple[bool, str]:
+        """
+        FN:health_check Check if OpenAI API is available.
+
+        Returns:
+            Tuple of (is_healthy, error_message)
+        """
+        try:
+            response = self._session.get(
+                f"{self.config.base_url}/models",
+                timeout=5,
+                headers={"Authorization": f"Bearer {self.config.api_key}"} if self.config.api_key else {}
+            )
+            response.raise_for_status()
+            return (True, "OpenAI API is available")
+        except requests.exceptions.ConnectionError:
+            return (False, "Cannot connect to API. Check your endpoint.")
+        except requests.exceptions.Timeout:
+            return (False, "API timed out")
+        except requests.exceptions.HTTPError as e:
+            return (False, f"API error: {e}")
 
     def generate(
         self,
@@ -405,22 +494,42 @@ class OpenAIProvider(AIProvider):
             "stream": True
         }
 
-        response = self._session.post(
-            self.endpoint,
-            json=payload,
-            stream=True,
-            timeout=120
-        )
-        response.raise_for_status()
+        try:
+            response = self._session.post(
+                self.endpoint,
+                json=payload,
+                stream=True,
+                timeout=120
+            )
+            # Debug: log response status and content-type
+            logger.debug("OpenAI POST status=%d content-type=%s", response.status_code, response.headers.get("content-type", "unknown"))
+            response.raise_for_status()
 
-        for line in response.iter_lines():
-            if line:
-                line = line.decode("utf-8")
-                if line.startswith("data: "):
-                    data = json.loads(line[6:])
-                    delta = data["choices"][0]["delta"]
-                    if "content" in delta:
-                        yield delta["content"]
+            for line_num, raw_line in enumerate(response.iter_lines()):
+                if raw_line:
+                    line = raw_line.decode("utf-8", errors="replace")
+                    logger.debug("OpenAI line %d: %s", line_num, line[:200])
+                    if line.startswith("data: "):
+                        json_data = line[6:].strip()
+                        # Skip heartbeat/keepalive messages
+                        if json_data == "[DONE]":
+                            continue
+                        try:
+                            data = json.loads(json_data)
+                            delta = data["choices"][0]["delta"]
+                            if "content" in delta:
+                                yield delta["content"]
+                        except (json.JSONDecodeError, KeyError, IndexError) as parse_err:
+                            # Log the raw response for debugging
+                            logger.error("OpenAI JSON parse error: %s | json_data: %s", parse_err, json_data[:200])
+                            error_msg = f"\n[Warning] API returned unexpected format: {json_data[:100]}\n"
+                            error_msg += f"Parse error: {parse_err}\n"
+                            yield error_msg
+        except requests.exceptions.RequestException as e:
+            # Yield error message as part of stream
+            error_msg = f"\n\n[Error] API request failed: {str(e)}\n"
+            error_msg += "Please check your API endpoint and ensure it supports streaming.\n"
+            yield error_msg
 
 
 def create_provider(

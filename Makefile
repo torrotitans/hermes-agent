@@ -8,7 +8,7 @@
 #   make lint          Run linting checks
 #   make clean         Clean build artifacts
 
-.PHONY: help run run-quickstart test lint clean setup
+.PHONY: help run run-quickstart test lint clean setup cli status
 
 # Default target
 help:
@@ -17,6 +17,7 @@ help:
 	@echo "Available commands:"
 	@echo "  make run           Run Hello World example"
 	@echo "  make run-quickstart Run quickstart example"
+	@echo "  make cli           Run interactive CLI mode"
 	@echo "  make test          Run all unit tests"
 	@echo "  make lint          Run linting checks"
 	@echo "  make clean         Clean build artifacts"
@@ -71,7 +72,12 @@ setup:
 # Check Torro status
 status:
 	@echo "=== Torro Status ==="
-	PYTHONPATH=$(PWD)/src python3 -m src.torro.cli status
+	PYTHONPATH=$(PWD)/src python3 -m src.cli status
+
+# Run interactive CLI
+cli:
+	@echo "=== Torro Interactive CLI ==="
+	PYTHONPATH=$(PWD)/src python3 -m src.cli interactive
 
 # Run with verbose output
 run-verbose:

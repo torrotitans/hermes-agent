@@ -38,6 +38,8 @@ from cli.ai_provider import (
     list_models,
     get_model_config
 )
+from cli.greetings import get_greeting, get_banner
+from cli.greetings import COLORS
 
 # Configure logging
 logging.basicConfig(
@@ -59,49 +61,49 @@ def show_status() -> int:
     
     # Check core components
     try:
-        from .tools.base import Tool
+        from ..tools.base import Tool
         print("Tool ABC: OK")
     except ImportError as e:
         print(f"Tool ABC: FAILED - {e}")
         return 1
     
     try:
-        from .tools.registry import ToolRegistry
+        from ..tools.registry import ToolRegistry
         print("Tool Registry: OK")
     except ImportError as e:
         print(f"Tool Registry: FAILED - {e}")
         return 1
     
     try:
-        from .context.base import ContextEngine
+        from ..context.base import ContextEngine
         print("ContextEngine ABC: OK")
     except ImportError as e:
         print(f"ContextEngine ABC: FAILED - {e}")
         return 1
     
     try:
-        from .memory.manager import MemoryManager
+        from ..memory.manager import MemoryManager
         print("MemoryManager: OK")
     except ImportError as e:
         print(f"MemoryManager: FAILED - {e}")
         return 1
     
     try:
-        from .coordinator.mode import is_coordinator_mode
+        from ..coordinator.mode import is_coordinator_mode
         print("Coordinator Mode: OK")
     except ImportError as e:
         print(f"Coordinator Mode: FAILED - {e}")
         return 1
     
     try:
-        from .innovation.auto_dream import AutoDream
+        from ..innovation.auto_dream import AutoDream
         print("autoDream: OK")
     except ImportError as e:
         print(f"autoDream: FAILED - {e}")
         return 1
     
     try:
-        from .gateway.base import BasePlatformAdapter
+        from ..gateway.base import BasePlatformAdapter
         print("Gateway Pattern: OK")
     except ImportError as e:
         print(f"Gateway Pattern: FAILED - {e}")
@@ -128,11 +130,79 @@ def run_interactive(args: argparse.Namespace) -> int:
     """
     # Initialize model registry
     registry = ModelRegistry()
-    model_name = args.model or registry.default_model or "local/qwen2.5:7b"
     
-    print("=== Torro Interactive CLI ===")
-    print(f"Model: {model_name}")
-    print("Type 'exit' to quit, 'help' for commands\n")
+    # Use provided model, or default from CLI_MODELS, or fall back to OPENAI_API base model
+    model_name = args.model
+    if not model_name:
+        model_name = registry.default_model or "local_qwen25_7b"
+    
+    # Create AI provider from config.ini model name
+    provider = None
+    provider_type = None
+    
+    try:
+        provider = create_provider(model_name)
+        provider_type = type(provider).__name__
+    except Exception as e:
+        print(f"Warning: Could not create provider for '{model_name}': {e}")
+        provider = None
+    
+    # Perform health check on the API BEFORE showing the banner
+    if provider is not None and hasattr(provider, 'health_check'):
+        is_healthy, health_msg = provider.health_check()
+        if not is_healthy:
+            print(f"[Info] {health_msg}")
+            print("Falling back to OPENAI_API base model...")
+            provider = None
+    
+    # If provider is None (failed creation or health check), try OPENAI_API config
+    if provider is None:
+        try:
+            from cli.ai_provider import ModelConfig, OpenAIProvider
+            import configparser
+            
+            config = configparser.ConfigParser()
+            config.read("config.ini")
+            
+            if config.has_section("OPENAI_API"):
+                base_url = config.get("OPENAI_API", "base_url", fallback="http://localhost:8000/v1")
+                model = config.get("OPENAI_API", "model", fallback="gpt-3.5-turbo")
+                api_key = config.get("OPENAI_API", "api_key", fallback=None)
+                
+                base_config = ModelConfig(
+                    name="base_model",
+                    provider_type="openai",
+                    model_name=model,
+                    base_url=base_url,
+                    api_key=api_key if api_key and api_key != "empty" else None
+                )
+                provider = OpenAIProvider(base_config)
+                provider_type = "OpenAIProvider (base model)"
+                model_name = f"{base_url}/{model}"
+                print(f"Using base model: {model}")
+            else:
+                print("Error: No [OPENAI_API] section in config.ini")
+                return 1
+        except Exception as fallback_error:
+            print(f"Error: Could not create fallback provider: {fallback_error}")
+            print("Please check your config.ini [OPENAI_API] section.")
+            return 1
+    
+    # Show ASCII banner
+    banner = get_banner()
+    print(banner)
+    
+    # Display model info with gradient effect
+    print(f"{COLORS['cyan']}{COLORS['bold']}┌─ Model:{COLORS['reset']} {COLORS['white']}{model_name}{COLORS['reset']}")
+    print(f"{COLORS['cyan']}{COLORS['bold']}├─ Provider:{COLORS['reset']} {COLORS['white']}{provider_type}{COLORS['reset']}")
+    print(f"{COLORS['dim']}└─ Type 'exit' to quit, 'help' for commands{COLORS['reset']}")
+    
+    # Show initial greeting with color and animation effect
+    greeting_msg, greeting_emoji, greeting_color = get_greeting()
+    color_code = COLORS.get(greeting_color, COLORS['white'])
+    print(f"{COLORS['bold']}{COLORS['cyan']}╭─ Torro Agent{COLORS['reset']}")
+    print(f"{COLORS['bold']}{COLORS['cyan']}│{COLORS['reset']} Hello! I'm Torro. {color_code}{greeting_msg} {greeting_emoji}{COLORS['reset']}")
+    print(f"{COLORS['bold']}{COLORS['cyan']}╰─{COLORS['reset']} How can I help you today?\n")
     
     # Initialize components
     session_db = SessionDB()
@@ -142,61 +212,65 @@ def run_interactive(args: argparse.Namespace) -> int:
     mode_selector = ModeSelector()
     orchestrator = AgenticOrchestrator()
     
-    # Create AI provider from config.ini model name
-    try:
-        provider = create_provider(model_name)
-    except Exception as e:
-        print(f"Error creating provider: {e}")
-        print("Falling back to default model...")
-        provider = create_provider("local/qwen2.5:7b")
-    
     # Create session
     session_id = f"session_{int(time.time())}"
     session_db.create_session(session_id, "interactive")
     
+    # Enhanced input prompt with color
+    prompt_symbol = f"{COLORS['green']}{COLORS['bold']}❯{COLORS['reset']} "
+    
     # Main loop
     while True:
         try:
-            # Get user input
-            user_input = input("> ").strip()
+            # Get user input with colored prompt
+            user_input = input(prompt_symbol).strip()
             
             if not user_input:
                 continue
             
             if user_input.lower() in ("exit", "quit"):
-                print("Goodbye!")
+                print(f"\n{COLORS['cyan']}═══════════════════════════════════════════════════════════{COLORS['reset']}")
+                print(f"{COLORS['green']}{COLORS['bold']}  👋 Goodbye! Thank you for using Torro Agent!{COLORS['reset']}")
+                print(f"{COLORS['cyan']}═══════════════════════════════════════════════════════════{COLORS['reset']}\n")
                 break
             
             if user_input.lower() == "help":
-                print("Commands: exit, quit, help, mode, model, list")
-                print(f"Current model: {model_name}")
+                print(f"\n{COLORS['yellow']}{COLORS['bold']}╭─ Available Commands{COLORS['reset']}")
+                print(f"{COLORS['cyan']}│{COLORS['reset']} {COLORS['bold']}exit{COLORS['reset']}     - Exit the application")
+                print(f"{COLORS['cyan']}│{COLORS['reset']} {COLORS['bold']}quit{COLORS['reset']}     - Exit the application")
+                print(f"{COLORS['cyan']}│{COLORS['reset']} {COLORS['bold']}help{COLORS['reset']}     - Show this help message")
+                print(f"{COLORS['cyan']}│{COLORS['reset']} {COLORS['bold']}mode{COLORS['reset']}     - Select execution mode")
+                print(f"{COLORS['cyan']}│{COLORS['reset']} {COLORS['bold']}model{COLORS['reset']}    - Change AI model")
+                print(f"{COLORS['cyan']}│{COLORS['reset']} {COLORS['bold']}list{COLORS['reset']}     - List available models")
+                print(f"{COLORS['cyan']}│{COLORS['reset']} {COLORS['bold']}status{COLORS['reset']}   - Show system status")
+                print(f"{COLORS['yellow']}{COLORS['bold']}╰─{COLORS['reset']}\n")
                 continue
             
             if user_input.lower() == "mode":
                 mode = mode_selector.select_mode()
                 if mode:
-                    print(f"Selected mode: {mode.value}")
+                    print(f"\n{COLORS['green']}{COLORS['bold']}✓{COLORS['reset']} Selected mode: {COLORS['cyan']}{mode.value}{COLORS['reset']}\n")
                 continue
             
             if user_input.lower() == "model":
-                new_model = input("Enter model name: ").strip()
+                new_model = input(f"{COLORS['cyan']}Enter model name: {COLORS['reset']}").strip()
                 if new_model:
                     try:
                         provider = create_provider(new_model)
                         model_name = new_model
-                        print(f"Switched to model: {model_name}")
+                        print(f"\n{COLORS['green']}{COLORS['bold']}✓{COLORS['reset']} Switched to model: {COLORS['cyan']}{model_name}{COLORS['reset']}\n")
                     except Exception as e:
-                        print(f"Error switching model: {e}")
+                        print(f"\n{COLORS['red']}{COLORS['bold']}✗{COLORS['reset']} Error switching model: {COLORS['red']}{e}{COLORS['reset']}\n")
                 continue
             
             if user_input.lower() == "list":
                 models = registry.list_models()
-                print("\nAvailable models:")
-                print(f"{'Name':<30} {'Provider':<12} {'Model':<30} {'Context':<10}")
-                print("-" * 82)
+                print(f"\n{COLORS['yellow']}{COLORS['bold']}╭─ Available AI Models{COLORS['reset']}")
+                print(f"{COLORS['dim']}│{'Name':<30} {'Provider':<12} {'Model':<30} {'Context':<10}{COLORS['reset']}")
+                print(f"{COLORS['dim']}├{'─' * 82}{COLORS['reset']}")
                 for m in models:
-                    print(f"{m.name:<30} {m.provider_type:<12} {m.model_name:<30} {m.context_window:<10}")
-                print()
+                    print(f"{COLORS['cyan']}│{COLORS['reset']} {COLORS['white']}{m.name:<30}{COLORS['reset']} {COLORS['yellow']}{m.provider_type:<12}{COLORS['reset']} {COLORS['green']}{m.model_name:<30}{COLORS['reset']} {COLORS['blue']}{m.context_window:<10}{COLORS['reset']}")
+                print(f"{COLORS['yellow']}{COLORS['bold']}╰─{COLORS['reset']} {COLORS['dim']}Total: {len(models)} models{COLORS['reset']}\n")
                 continue
             
             # Check for ambiguity
@@ -217,13 +291,18 @@ def run_interactive(args: argparse.Namespace) -> int:
                 print("Please rephrase your request or try a different approach.")
                 continue
             
-            # Generate response
-            print("\nAssistant: ", end="")
+            # Generate response with visual indicator
+            print(f"\n{COLORS['magenta']}{COLORS['bold']}╭─ Torro Agent Response{COLORS['reset']}")
             response = ""
-            for token in provider.stream(user_input):
-                print(token, end="", flush=True)
-                response += token
-            print("\n")
+            try:
+                print(f"{COLORS['magenta']}│{COLORS['reset']} ", end="")
+                for token in provider.stream(user_input):
+                    print(token, end="", flush=True)
+                    response += token
+                print(f"\n{COLORS['magenta']}{COLORS['bold']}╰─{COLORS['reset']} {COLORS['dim']}Response complete{COLORS['reset']}\n")
+            except Exception as e:
+                print(f"\n{COLORS['red']}{COLORS['bold']}╰─ ✗ Error: {e}{COLORS['reset']}\n")
+                response = f"[Error] {e}"
             
             # Record command for frequency analysis
             orchestrator.record_command(user_input)
